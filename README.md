@@ -5,4 +5,6 @@ Experience an interactive, randomized retro sci-fi dashboard with an alien aesth
 
 ---
 
+![alien-computer](https://github.com/user-attachments/assets/3209580b-7124-4fdc-a56c-477475ddb743)
+
 * Try it now: [https://pirillo.com/arcade/alien-computer.html](https://pirillo.com/arcade/alien-computer.html)
