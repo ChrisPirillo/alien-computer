@@ -288,6 +288,24 @@
         .glyph-waterfall-content { display: flex; justify-content: space-around; overflow: hidden; }
         .glyph-waterfall-column { line-height: 1; animation: fall 5s linear infinite; }
         @keyframes fall { 0% { transform: translateY(-100%); opacity: 0; } 10% { opacity: 1;} 90% { opacity: 1;} 100% { transform: translateY(100%); opacity: 0;} }
+
+        /* --- Screenshot Button --- */
+        #screenshotButton {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            padding: 4px 8px;
+            background-color: var(--button-default-bg);
+            border: 1px solid var(--button-default-border);
+            border-radius: 3px;
+            color: var(--primary-text-color);
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        #screenshotButton:hover {
+            background-color: rgba(var(--base-phosphor-color-rgb), 0.2);
+        }
     </style>
 </head>
 <body>
@@ -296,6 +314,7 @@
 
     <div id="dashboardRoot">
         </div>
+    <button id="screenshotButton" aria-label="Screenshot">📸</button>
 
     <script>
         // --- Global flag to prevent concurrent dashboard builds ---
@@ -2974,6 +2993,8 @@ function createQuantumEntanglementPanel(areaName) {
         window.addEventListener('load', () => {
             applyRandomMonochromeTheme();
             buildRandomDashboard();
+            const btn = document.getElementById('screenshotButton');
+            if (btn) btn.onclick = captureScreenshot;
         });
 
         document.addEventListener('keydown', (event) => {
