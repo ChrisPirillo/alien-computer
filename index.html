@@ -302,6 +302,7 @@
             justify-content: center;
             cursor: pointer;
             transition: background-color 0.15s;
+            z-index: 1000;
         }
         #screenshotButton:hover {
             background-color: rgba(var(--base-phosphor-color-rgb), 0.2);
@@ -2982,12 +2983,18 @@ function createQuantumEntanglementPanel(areaName) {
     </script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script>
-      document.getElementById('screenshotButton').addEventListener('click', () => {
-        html2canvas(document.getElementById('dashboardRoot')).then(canvas => {
+      const screenshotBtn = document.getElementById('screenshotButton');
+      screenshotBtn.addEventListener('click', () => {
+        screenshotBtn.style.display = 'none';
+        html2canvas(
+          document.getElementById('dashboardRoot'),
+          { useCORS: true, allowTaint: true }
+        ).then(canvas => {
           const link = document.createElement('a');
           link.href = canvas.toDataURL('image/png');
           link.download = 'alien-dashboard.png';
           link.click();
+          screenshotBtn.style.display = 'flex';
         });
       });
     </script>
