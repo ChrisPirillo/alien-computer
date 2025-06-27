@@ -3014,6 +3014,23 @@ function createQuantumEntanglementPanel(areaName) {
         };
       }
 
+      function inlineSvgUses(root) {
+        const originals = [];
+        root.querySelectorAll('svg use[href^="#"]').forEach(use => {
+          const svg = use.closest('svg');
+          const symbol = document.querySelector(`symbol${use.getAttribute('href')}`);
+          if (svg && symbol) {
+            originals.push({ svg, content: svg.innerHTML });
+            svg.innerHTML = symbol.innerHTML;
+          }
+        });
+        return () => {
+          originals.forEach(({ svg, content }) => {
+            svg.innerHTML = content;
+          });
+        };
+      }
+
       function pauseAnimations(root) {
         root.classList.add('capture-mode');
       }
@@ -3025,7 +3042,8 @@ function createQuantumEntanglementPanel(areaName) {
       screenshotBtn.addEventListener('click', () => {
         screenshotBtn.style.display = 'none';
         const root = document.getElementById('dashboardRoot');
-        const restore = freezeCanvases(root);
+        const restoreCanvases = freezeCanvases(root);
+        const restoreSvgs = inlineSvgUses(root);
         pauseAnimations(root);
         html2canvas(root, { useCORS: true, backgroundColor: null, scale: 1 })
           .then(canvas => {
@@ -3033,12 +3051,14 @@ function createQuantumEntanglementPanel(areaName) {
             link.href = canvas.toDataURL('image/png');
             link.download = 'alien-dashboard.png';
             link.click();
-            restore();
+            restoreSvgs();
+            restoreCanvases();
             resumeAnimations(root);
             screenshotBtn.style.display = 'flex';
           })
           .catch(() => {
-            restore();
+            restoreSvgs();
+            restoreCanvases();
             resumeAnimations(root);
             screenshotBtn.style.display = 'flex';
           });

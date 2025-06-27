@@ -6,6 +6,7 @@ Experience an interactive, randomized retro sci-fi dashboard with an alien aesth
 Press the floating glyph in the bottom-right corner to save a screenshot of the current dashboard. The button briefly hides itself while capturing so the image matches what you see on screen.
 Canvas panels are frozen during capture so their contents appear correctly and the process finishes quickly.
 Animations pause briefly during capture so the screenshot includes every panel without slowing the browser.
+Glyph icons are inlined during capture so every symbol appears in the screenshot.
 
 ---
 
