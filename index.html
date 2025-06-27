@@ -2993,34 +2993,13 @@ function createQuantumEntanglementPanel(areaName) {
     <script>
       const screenshotBtn = document.getElementById('screenshotButton');
 
-      function freezeCanvases(root) {
-        const replacements = [];
-        root.querySelectorAll('canvas').forEach(c => {
-          try {
-            const img = new Image();
-            img.src = c.toDataURL();
-            img.width = c.width;
-            img.height = c.height;
-            c.style.display = 'none';
-            c.parentNode.insertBefore(img, c);
-            replacements.push({ canvas: c, img });
-          } catch (e) {}
-        });
-        return () => {
-          replacements.forEach(({ canvas, img }) => {
-            img.remove();
-            canvas.style.display = '';
-          });
-        };
-      }
-
-      function inlineSvgUses(root) {
+      function inlineSvgUses(root, doc = document) {
         const entries = [];
         const seen = new Set();
         root.querySelectorAll('svg use').forEach(use => {
           const svg = use.closest('svg');
           const href = use.getAttribute('href') || use.getAttribute('xlink:href');
-          const symbol = href && document.querySelector(`symbol${href}`);
+          const symbol = href && doc.querySelector(`symbol${href}`);
           if (svg && symbol) {
             if (!seen.has(svg)) {
               entries.push({ svg, html: svg.innerHTML });
@@ -3052,28 +3031,34 @@ function createQuantumEntanglementPanel(areaName) {
       screenshotBtn.addEventListener('click', () => {
         screenshotBtn.style.display = 'none';
         const root = document.getElementById('dashboardRoot');
-        const restoreCanvases = freezeCanvases(root);
-        const restoreSvgs = inlineSvgUses(root);
-        pauseAnimations(root);
         html2canvas(root, {
           useCORS: true,
           allowTaint: true,
           backgroundColor: null,
-          scale: window.devicePixelRatio || 1
+          scale: window.devicePixelRatio || 1,
+          onclone: (doc) => {
+            const cloneRoot = doc.getElementById('dashboardRoot');
+            inlineSvgUses(cloneRoot, doc);
+            cloneRoot.querySelectorAll('canvas').forEach(c => {
+              try {
+                const img = doc.createElement('img');
+                img.src = c.toDataURL();
+                img.width = c.width;
+                img.height = c.height;
+                c.replaceWith(img);
+              } catch (e) {}
+            });
+            pauseAnimations(cloneRoot);
+          }
         })
           .then(canvas => {
             const link = document.createElement('a');
             link.href = canvas.toDataURL('image/png');
             link.download = 'alien-dashboard.png';
             link.click();
-            restoreSvgs();
-            restoreCanvases();
-            resumeAnimations(root);
-            screenshotBtn.style.display = 'flex';
           })
-          .catch(() => {
-            restoreSvgs();
-            restoreCanvases();
+          .catch(() => {})
+          .finally(() => {
             resumeAnimations(root);
             screenshotBtn.style.display = 'flex';
           });
