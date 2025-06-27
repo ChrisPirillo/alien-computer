@@ -3017,10 +3017,10 @@ function createQuantumEntanglementPanel(areaName) {
       function inlineSvgUses(root) {
         const entries = [];
         const seen = new Set();
-        root.querySelectorAll('svg use[href^="#"]').forEach(use => {
+        root.querySelectorAll('svg use').forEach(use => {
           const svg = use.closest('svg');
-          const href = use.getAttribute('href');
-          const symbol = document.querySelector(`symbol${href}`);
+          const href = use.getAttribute('href') || use.getAttribute('xlink:href');
+          const symbol = href && document.querySelector(`symbol${href}`);
           if (svg && symbol) {
             if (!seen.has(svg)) {
               entries.push({ svg, html: svg.innerHTML });
