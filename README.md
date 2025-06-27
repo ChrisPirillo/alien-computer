@@ -4,6 +4,7 @@
 Experience an interactive, randomized retro sci-fi dashboard with an alien aesthetic, 50 panel types, 50 'Tetris-like' static layouts filling the entire browser window, with significantly improved performance and robustly filled glyph-only content.
 
 Press the floating glyph in the bottom-right corner to save a screenshot of the current dashboard. The button briefly hides itself while capturing so the image matches what you see on screen.
+Canvas panels are frozen during capture so their contents appear correctly and the process finishes quickly.
 
 ---
 

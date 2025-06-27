@@ -2984,18 +2984,45 @@ function createQuantumEntanglementPanel(areaName) {
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <script>
       const screenshotBtn = document.getElementById('screenshotButton');
+
+      function freezeCanvases(root) {
+        const replacements = [];
+        root.querySelectorAll('canvas').forEach(c => {
+          try {
+            const img = new Image();
+            img.src = c.toDataURL();
+            img.width = c.width;
+            img.height = c.height;
+            c.style.display = 'none';
+            c.parentNode.insertBefore(img, c);
+            replacements.push({ canvas: c, img });
+          } catch (e) {}
+        });
+        return () => {
+          replacements.forEach(({ canvas, img }) => {
+            img.remove();
+            canvas.style.display = '';
+          });
+        };
+      }
+
       screenshotBtn.addEventListener('click', () => {
         screenshotBtn.style.display = 'none';
-        html2canvas(
-          document.getElementById('dashboardRoot'),
-          { useCORS: true, allowTaint: true }
-        ).then(canvas => {
-          const link = document.createElement('a');
-          link.href = canvas.toDataURL('image/png');
-          link.download = 'alien-dashboard.png';
-          link.click();
-          screenshotBtn.style.display = 'flex';
-        });
+        const root = document.getElementById('dashboardRoot');
+        const restore = freezeCanvases(root);
+        html2canvas(root, { useCORS: true, backgroundColor: null, scale: 1 })
+          .then(canvas => {
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = 'alien-dashboard.png';
+            link.click();
+            restore();
+            screenshotBtn.style.display = 'flex';
+          })
+          .catch(() => {
+            restore();
+            screenshotBtn.style.display = 'flex';
+          });
       });
     </script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-1CQ4D3VQ3L"></script>
