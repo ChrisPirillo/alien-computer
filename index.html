@@ -307,6 +307,14 @@
         #screenshotButton:hover {
             background-color: rgba(var(--base-phosphor-color-rgb), 0.2);
         }
+
+        .capture-mode *,
+        .capture-mode *::before,
+        .capture-mode *::after {
+            animation-play-state: paused !important;
+            animation: none !important;
+            transition: none !important;
+        }
     </style>
 </head>
 <body>
@@ -3006,10 +3014,19 @@ function createQuantumEntanglementPanel(areaName) {
         };
       }
 
+      function pauseAnimations(root) {
+        root.classList.add('capture-mode');
+      }
+
+      function resumeAnimations(root) {
+        root.classList.remove('capture-mode');
+      }
+
       screenshotBtn.addEventListener('click', () => {
         screenshotBtn.style.display = 'none';
         const root = document.getElementById('dashboardRoot');
         const restore = freezeCanvases(root);
+        pauseAnimations(root);
         html2canvas(root, { useCORS: true, backgroundColor: null, scale: 1 })
           .then(canvas => {
             const link = document.createElement('a');
@@ -3017,10 +3034,12 @@ function createQuantumEntanglementPanel(areaName) {
             link.download = 'alien-dashboard.png';
             link.click();
             restore();
+            resumeAnimations(root);
             screenshotBtn.style.display = 'flex';
           })
           .catch(() => {
             restore();
+            resumeAnimations(root);
             screenshotBtn.style.display = 'flex';
           });
       });
