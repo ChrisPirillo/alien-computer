@@ -49,6 +49,7 @@
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap');
 
@@ -2944,16 +2945,43 @@ function createQuantumEntanglementPanel(areaName) {
             }
         }
 
+        function captureScreenshot() {
+            const root = document.getElementById('dashboardRoot');
+            html2canvas(root, {
+                useCORS: true,
+                onclone: (cloneDoc) => {
+                    const cloneRoot = cloneDoc.getElementById('dashboardRoot');
+                    const origCanvases = root.querySelectorAll('canvas');
+                    const cloneCanvases = cloneRoot.querySelectorAll('canvas');
+                    cloneCanvases.forEach((c, i) => {
+                        const orig = origCanvases[i];
+                        const img = cloneDoc.createElement('img');
+                        img.src = orig.toDataURL();
+                        img.width = orig.width;
+                        img.height = orig.height;
+                        c.replaceWith(img);
+                    });
+                }
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'dashboard.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
         // --- Event Listeners ---
         window.addEventListener('load', () => {
             applyRandomMonochromeTheme();
-            buildRandomDashboard(); 
+            buildRandomDashboard();
         });
 
         document.addEventListener('keydown', (event) => {
-            if (event.key === 'r' || event.key === 'R') { 
+            if (event.key === 'r' || event.key === 'R') {
                 applyRandomMonochromeTheme();
                 buildRandomDashboard();
+            } else if (event.key === 'p' || event.key === 'P') {
+                captureScreenshot();
             }
         });
 
