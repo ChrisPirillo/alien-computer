@@ -285,8 +285,36 @@
         .data-barcode-strip { display: flex; align-items: flex-end; height: 1.2em; }
         .status-light-array-content { display: grid; grid-template-columns: repeat(auto-fill, minmax(0.8em, 1fr)); gap: 1px; align-content: flex-start; padding: 2px;}
         .glyph-waterfall-content { display: flex; justify-content: space-around; overflow: hidden; }
-        .glyph-waterfall-column { line-height: 1; animation: fall 5s linear infinite; }
-        @keyframes fall { 0% { transform: translateY(-100%); opacity: 0; } 10% { opacity: 1;} 90% { opacity: 1;} 100% { transform: translateY(100%); opacity: 0;} }
+.glyph-waterfall-column { line-height: 1; animation: fall 5s linear infinite; }
+@keyframes fall { 0% { transform: translateY(-100%); opacity: 0; } 10% { opacity: 1;} 90% { opacity: 1;} 100% { transform: translateY(100%); opacity: 0;} }
+
+        #screenshotButton {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 2.2em;
+            height: 2.2em;
+            background-color: var(--button-default-bg);
+            border: 1px solid var(--button-default-border);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            z-index: 1000;
+        }
+        #screenshotButton:hover {
+            background-color: rgba(var(--base-phosphor-color-rgb), 0.2);
+        }
+
+        .capture-mode *,
+        .capture-mode *::before,
+        .capture-mode *::after {
+            animation-play-state: paused !important;
+            animation: none !important;
+            transition: none !important;
+        }
     </style>
 </head>
 <body>
@@ -295,6 +323,9 @@
 
     <div id="dashboardRoot">
         </div>
+    <div id="screenshotButton" title="Save Screenshot">
+        <svg class="alien-glyph"><use href="#g18"></use></svg>
+    </div>
 
     <script>
         // --- Global flag to prevent concurrent dashboard builds ---
@@ -2957,6 +2988,81 @@ function createQuantumEntanglementPanel(areaName) {
             }
         });
 
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script>
+      const screenshotBtn = document.getElementById('screenshotButton');
+
+      function inlineSvgUses(root, doc = document) {
+        const entries = [];
+        const seen = new Set();
+        root.querySelectorAll('svg use').forEach(use => {
+          const svg = use.closest('svg');
+          const href = use.getAttribute('href') || use.getAttribute('xlink:href');
+          const symbol = href && doc.querySelector(`symbol${href}`);
+          if (svg && symbol) {
+            if (!seen.has(svg)) {
+              entries.push({ svg, html: svg.innerHTML });
+              seen.add(svg);
+            }
+            const frag = document.createRange().createContextualFragment(symbol.innerHTML);
+            const viewBox = symbol.getAttribute('viewBox');
+            if (viewBox && !svg.getAttribute('viewBox')) {
+              svg.setAttribute('viewBox', viewBox);
+            }
+            use.replaceWith(frag);
+          }
+        });
+        return () => {
+          entries.forEach(({ svg, html }) => {
+            svg.innerHTML = html;
+          });
+        };
+      }
+
+      function pauseAnimations(root) {
+        root.classList.add('capture-mode');
+      }
+
+      function resumeAnimations(root) {
+        root.classList.remove('capture-mode');
+      }
+
+      screenshotBtn.addEventListener('click', () => {
+        screenshotBtn.style.display = 'none';
+        const root = document.getElementById('dashboardRoot');
+        html2canvas(root, {
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null,
+          scale: window.devicePixelRatio || 1,
+          onclone: (doc) => {
+            const cloneRoot = doc.getElementById('dashboardRoot');
+            inlineSvgUses(cloneRoot, doc);
+            cloneRoot.querySelectorAll('canvas').forEach(c => {
+              try {
+                const img = doc.createElement('img');
+                img.src = c.toDataURL();
+                img.width = c.width;
+                img.height = c.height;
+                c.replaceWith(img);
+              } catch (e) {}
+            });
+            pauseAnimations(cloneRoot);
+          }
+        })
+          .then(canvas => {
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = 'alien-dashboard.png';
+            link.click();
+          })
+          .catch(() => {})
+          .finally(() => {
+            resumeAnimations(root);
+            screenshotBtn.style.display = 'flex';
+          });
+      });
     </script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-1CQ4D3VQ3L"></script>
 <script>
