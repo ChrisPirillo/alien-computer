@@ -7,6 +7,8 @@ Press the floating glyph in the bottom-right corner to save a screenshot of the 
 Canvas panels are frozen during capture so their contents appear correctly and the process finishes quickly.
 Animations pause briefly during capture so the screenshot includes every panel without slowing the browser.
 Glyph icons are inlined during capture so every symbol appears in the screenshot.
+The screenshot now preserves the screen's scanline overlay so the saved image
+matches the dashboard's retro CRT look.
 
 ---
 

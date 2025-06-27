@@ -3015,18 +3015,28 @@ function createQuantumEntanglementPanel(areaName) {
       }
 
       function inlineSvgUses(root) {
-        const originals = [];
+        const entries = [];
+        const seen = new Set();
         root.querySelectorAll('svg use[href^="#"]').forEach(use => {
           const svg = use.closest('svg');
-          const symbol = document.querySelector(`symbol${use.getAttribute('href')}`);
+          const href = use.getAttribute('href');
+          const symbol = document.querySelector(`symbol${href}`);
           if (svg && symbol) {
-            originals.push({ svg, content: svg.innerHTML });
-            svg.innerHTML = symbol.innerHTML;
+            if (!seen.has(svg)) {
+              entries.push({ svg, html: svg.innerHTML });
+              seen.add(svg);
+            }
+            const frag = document.createRange().createContextualFragment(symbol.innerHTML);
+            const viewBox = symbol.getAttribute('viewBox');
+            if (viewBox && !svg.getAttribute('viewBox')) {
+              svg.setAttribute('viewBox', viewBox);
+            }
+            use.replaceWith(frag);
           }
         });
         return () => {
-          originals.forEach(({ svg, content }) => {
-            svg.innerHTML = content;
+          entries.forEach(({ svg, html }) => {
+            svg.innerHTML = html;
           });
         };
       }
@@ -3045,7 +3055,12 @@ function createQuantumEntanglementPanel(areaName) {
         const restoreCanvases = freezeCanvases(root);
         const restoreSvgs = inlineSvgUses(root);
         pauseAnimations(root);
-        html2canvas(root, { useCORS: true, backgroundColor: null, scale: 1 })
+        html2canvas(root, {
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: null,
+          scale: window.devicePixelRatio || 1
+        })
           .then(canvas => {
             const link = document.createElement('a');
             link.href = canvas.toDataURL('image/png');
