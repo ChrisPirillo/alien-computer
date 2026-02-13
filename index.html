@@ -2599,12 +2599,12 @@ function createQuantumEntanglementPanel(areaName) {
                     dashboardRoot.appendChild(getNextPanel('aux', !alertPanelUsed ? 'Alert' : null).func('auxB'));
                 } else if (layoutType === 16) {
                     gridTemplateColumns = "1fr 1fr 1fr"; gridTemplateRows = "1fr 1fr";
-                    gridTemplateAreas = `"aux1 main main" "main main aux2"`;
+                    gridTemplateAreas = `"aux1 main main" "aux2 main main"`;
                     dashboardRoot.appendChild(getNextPanel('aux').func('aux1')); dashboardRoot.appendChild(getNextPanel('main').func('main'));
                     dashboardRoot.appendChild(getNextPanel('aux', !alertPanelUsed ? 'Alert' : null).func('aux2'));
                 } else if (layoutType === 17) {
                     gridTemplateColumns = "1fr 1fr 1fr"; gridTemplateRows = "1fr 1fr";
-                    gridTemplateAreas = `"main main aux1" "aux2 main main"`;
+                    gridTemplateAreas = `"main main aux1" "main main aux2"`;
                     dashboardRoot.appendChild(getNextPanel('main').func('main')); dashboardRoot.appendChild(getNextPanel('aux').func('aux1'));
                     dashboardRoot.appendChild(getNextPanel('aux', !alertPanelUsed ? 'Alert' : null).func('aux2'));
                 } else if (layoutType === 18) {
@@ -2629,10 +2629,11 @@ function createQuantumEntanglementPanel(areaName) {
                     dashboardRoot.appendChild(getNextPanel('aux', !alertPanelUsed && Math.random() < 0.5 ? 'Alert' : null).func('rightColAlert'));
                 } else if (layoutType === 21) {
                     gridTemplateColumns = "1fr 1.5fr 1fr"; gridTemplateRows = "1fr 1.5fr 1fr";
-                    gridTemplateAreas = `"aux1 mainV aux2" "mainH mainH mainH" "aux3 mainV auxAlert"`;
-                    dashboardRoot.appendChild(getNextPanel('aux').func('aux1')); dashboardRoot.appendChild(getNextPanel('main').func('mainV'));
+                    gridTemplateAreas = `"aux1 mainVTop aux2" "mainH mainH mainH" "aux3 mainVBot auxAlert"`;
+                    dashboardRoot.appendChild(getNextPanel('aux').func('aux1')); dashboardRoot.appendChild(getNextPanel('main').func('mainVTop'));
                     dashboardRoot.appendChild(getNextPanel('aux').func('aux2')); dashboardRoot.appendChild(getNextPanel('main').func('mainH'));
-                    dashboardRoot.appendChild(getNextPanel('aux').func('aux3')); dashboardRoot.appendChild(getNextPanel('aux', 'Alert').func('auxAlert'));
+                    dashboardRoot.appendChild(getNextPanel('aux').func('aux3')); dashboardRoot.appendChild(getNextPanel('main').func('mainVBot'));
+                    dashboardRoot.appendChild(getNextPanel('aux', 'Alert').func('auxAlert'));
                 } else if (layoutType === 22) {
                     gridTemplateColumns = "2fr 2fr"; gridTemplateRows = "1fr 1fr 1fr";
                     gridTemplateAreas = `"mainL aux1" "mainL aux2" "mainL auxAlert"`;
