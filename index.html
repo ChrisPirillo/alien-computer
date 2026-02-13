@@ -49,6 +49,7 @@
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap');
 
@@ -2453,46 +2454,30 @@ function createQuantumEntanglementPanel(areaName) {
                 let alertPanelUsed = false;
 
                 function getNextPanel(preferredType = 'aux', specificName = null) {
-                    if (specificName === 'Alert' && alertPanelUsed) { 
-                        preferredType = 'aux'; 
-                        specificName = null;
-                    }
-
-                    if (specificName) {
-                        let specificBlueprint = availableMainPanels.find(p => p.name === specificName);
-                        if (specificBlueprint) {
-                            if (specificName === 'Alert') alertPanelUsed = true;
-                            if (specificName !== 'Alert') availableMainPanels = availableMainPanels.filter(p => p.name !== specificName);
-                            return specificBlueprint;
-                        }
-                        specificBlueprint = availableAuxPanels.find(p => p.name === specificName);
-                         if (specificBlueprint) {
-                            if (specificName === 'Alert') alertPanelUsed = true;
-                            if (specificName !== 'Alert') availableAuxPanels = availableAuxPanels.filter(p => p.name !== specificName);
-                            return specificBlueprint;
-                        }
-                    }
-
-                    if (preferredType === 'main' && availableMainPanels.length > 0) {
-                        const panelBp = availableMainPanels[mainPanelCounter % availableMainPanels.length];
-                         if (panelBp.name === 'Alert') {
-                            if (alertPanelUsed) { mainPanelCounter++; return getNextPanel('main');} 
-                            alertPanelUsed = true;
-                        }
-                        mainPanelCounter++; return panelBp;
-                    }
-                    if (availableAuxPanels.length > 0) {
-                        const panelBp = availableAuxPanels[auxPanelCounter % availableAuxPanels.length];
-                        if (panelBp.name === 'Alert') {
-                            if (alertPanelUsed) { auxPanelCounter++; return getNextPanel('aux'); } 
-                            alertPanelUsed = true;
-                        }
-                        auxPanelCounter++; return panelBp;
-                    }
-                    if (preferredType === 'main' && availableAuxPanels.length > 0) return getNextPanel('aux'); 
-                    if (preferredType === 'aux' && availableMainPanels.length > 0) return getNextPanel('main');
-
-                    return panelBlueprints[Math.floor(Math.random() * panelBlueprints.length)];
+                    const _getBp = (pType, sName) => {
+                         if (sName === 'Alert' && alertPanelUsed) { pType = 'aux'; sName = null; }
+                         if (sName) {
+                            let sb = availableMainPanels.find(p => p.name === sName);
+                            if (sb) { if (sName === 'Alert') alertPanelUsed = true; else availableMainPanels = availableMainPanels.filter(p => p.name !== sName); return sb; }
+                            sb = availableAuxPanels.find(p => p.name === sName);
+                            if (sb) { if (sName === 'Alert') alertPanelUsed = true; else availableAuxPanels = availableAuxPanels.filter(p => p.name !== sName); return sb; }
+                         }
+                         if (pType === 'main' && availableMainPanels.length > 0) {
+                             const pb = availableMainPanels[mainPanelCounter % availableMainPanels.length];
+                             if (pb.name === 'Alert') { if(alertPanelUsed) { mainPanelCounter++; return _getBp('main'); } alertPanelUsed=true; }
+                             mainPanelCounter++; return pb;
+                         }
+                         if (availableAuxPanels.length > 0) {
+                             const pb = availableAuxPanels[auxPanelCounter % availableAuxPanels.length];
+                             if (pb.name === 'Alert') { if(alertPanelUsed) { auxPanelCounter++; return _getBp('aux'); } alertPanelUsed=true; }
+                             auxPanelCounter++; return pb;
+                         }
+                         if (pType === 'main' && availableAuxPanels.length > 0) return _getBp('aux');
+                         if (pType === 'aux' && availableMainPanels.length > 0) return _getBp('main');
+                         return panelBlueprints[Math.floor(Math.random() * panelBlueprints.length)];
+                    };
+                    const bp = _getBp(preferredType, specificName);
+                    return { ...bp, func: (area) => { const p = bp.func(area); if(p) p.dataset.blueprintName = bp.name; return p; } };
                 }
 
 
@@ -2958,6 +2943,107 @@ function createQuantumEntanglementPanel(areaName) {
             }
         });
 
+    </script>
+    <div id="exportBtn" title="Export 4K Wallpaper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+    </div>
+    <style>
+        #exportBtn {
+            position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px;
+            background: rgba(0,0,0,0.5); border: 1px solid var(--panel-border-color);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; opacity: 0.3; transition: opacity 0.3s, background 0.3s; z-index: 1000;
+            color: var(--primary-text-color);
+        }
+        #exportBtn:hover { opacity: 1; background: rgba(var(--base-phosphor-color-rgb), 0.2); }
+        #exportBtn svg { width: 20px; height: 20px; }
+    </style>
+    <script>
+        document.getElementById('exportBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('exportBtn');
+            btn.style.opacity = '0.1'; btn.style.pointerEvents = 'none';
+
+            // --- Export Logic ---
+            const targetWidth = 3840; const targetHeight = 2160;
+            const container = document.createElement('div');
+            container.id = 'exportContainer';
+            // Position far off-screen but visible to renderer
+            container.style.position = 'fixed'; container.style.left = '100vw'; container.style.top = '0';
+            container.style.width = targetWidth + 'px'; container.style.height = targetHeight + 'px';
+            container.style.backgroundColor = '#020202';
+            container.style.display = 'grid'; container.style.gap = '2px'; container.style.padding = '2px';
+            container.style.overflow = 'hidden';
+            container.style.boxSizing = 'border-box';
+
+            // Copy grid styles
+            const root = document.getElementById('dashboardRoot');
+            container.style.gridTemplateColumns = root.style.gridTemplateColumns;
+            container.style.gridTemplateRows = root.style.gridTemplateRows;
+            container.style.gridTemplateAreas = root.style.gridTemplateAreas;
+
+            // Scale font size
+            const scale = targetWidth / root.clientWidth;
+            const computedFontSize = parseFloat(getComputedStyle(document.body).fontSize) || 16;
+            container.style.fontSize = (computedFontSize * scale) + 'px';
+
+            document.body.appendChild(container);
+
+            // Reconstruct Panels
+            const panels = Array.from(root.children);
+            const initPromises = [];
+
+            panels.forEach(p => {
+                const area = p.style.gridArea;
+                const bpName = p.dataset.blueprintName;
+                if (!bpName || !area) return;
+
+                const bp = panelBlueprints.find(b => b.name === bpName);
+                if (bp) {
+                    const newPanel = bp.func(area);
+                    container.appendChild(newPanel);
+
+                    // Trigger Init
+                    if (newPanel.initContent) {
+                         initPromises.push(new Promise(resolve => {
+                             requestAnimationFrame(() => {
+                                 newPanel.initContent();
+                                 resolve();
+                             });
+                         }));
+                    }
+                }
+            });
+
+            await Promise.all(initPromises);
+            // Wait for animations/canvas draws
+            await new Promise(r => setTimeout(r, 1500));
+
+            try {
+                const canvas = await html2canvas(container, {
+                    scale: 1,
+                    width: targetWidth, height: targetHeight,
+                    windowWidth: targetWidth, windowHeight: targetHeight,
+                    backgroundColor: '#020202',
+                    logging: false,
+                    useCORS: true
+                });
+
+                const link = document.createElement('a');
+                link.download = 'alien-terminal-wallpaper-4k.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (err) {
+                console.error("Export failed:", err);
+                alert("Export failed. See console.");
+            } finally {
+                document.body.removeChild(container);
+                btn.style.opacity = ''; btn.style.pointerEvents = '';
+            }
+        });
     </script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-1CQ4D3VQ3L"></script>
 <script>
