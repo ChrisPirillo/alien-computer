@@ -2945,104 +2945,145 @@ function createQuantumEntanglementPanel(areaName) {
 
     </script>
     <div id="exportBtn" title="Export 4K Wallpaper">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="export-icon">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+            <circle cx="12" cy="12" r="3" stroke-width="1"></circle>
+            <path d="M12 22V12"></path>
         </svg>
     </div>
     <style>
-        #exportBtn {
-            position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px;
-            background: rgba(0,0,0,0.5); border: 1px solid var(--panel-border-color);
+                #exportBtn {
+            position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px;
+            background: rgba(0,0,0,0.6); border: 1px solid var(--panel-border-color);
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; opacity: 0.3; transition: opacity 0.3s, background 0.3s; z-index: 1000;
-            color: var(--primary-text-color);
+            cursor: pointer; opacity: 0.6; transition: all 0.3s; z-index: 1000;
+            color: var(--primary-text-color); box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
-        #exportBtn:hover { opacity: 1; background: rgba(var(--base-phosphor-color-rgb), 0.2); }
-        #exportBtn svg { width: 20px; height: 20px; }
+        #exportBtn:hover { opacity: 1; background: rgba(var(--base-phosphor-color-rgb), 0.2); box-shadow: 0 0 15px var(--panel-glow-color-strong); transform: scale(1.1); }
+        #exportBtn svg { width: 28px; height: 28px; transition: transform 0.5s; }
+        #exportBtn.loading { pointer-events: none; opacity: 0.8; animation: pulse-btn 1.5s infinite; }
+        .spinner-icon { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse-btn { 0%, 100% { box-shadow: 0 0 10px var(--panel-glow-color-strong); } 50% { box-shadow: 0 0 25px var(--panel-glow-color-strong); } }
+
     </style>
     <script>
-        document.getElementById('exportBtn').addEventListener('click', async () => {
+                document.getElementById('exportBtn').addEventListener('click', async () => {
             const btn = document.getElementById('exportBtn');
-            btn.style.opacity = '0.1'; btn.style.pointerEvents = 'none';
+            const originalContent = btn.innerHTML;
 
-            // --- Export Logic ---
-            const targetWidth = 3840; const targetHeight = 2160;
-            const container = document.createElement('div');
-            container.id = 'exportContainer';
-            // Position far off-screen but visible to renderer
-            container.style.position = 'fixed'; container.style.left = '100vw'; container.style.top = '0';
-            container.style.width = targetWidth + 'px'; container.style.height = targetHeight + 'px';
-            container.style.backgroundColor = '#020202';
-            container.style.display = 'grid'; container.style.gap = '2px'; container.style.padding = '2px';
-            container.style.overflow = 'hidden';
-            container.style.boxSizing = 'border-box';
+            // 1. UI Feedback: Show Loading State
+            btn.classList.add('loading');
+            btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spinner-icon"><circle cx="12" cy="12" r="10" opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" opacity="0.75"></path></svg>';
+            btn.title = "Generating 4K Wallpaper... (Please Wait)";
 
-            // Copy grid styles
-            const root = document.getElementById('dashboardRoot');
-            container.style.gridTemplateColumns = root.style.gridTemplateColumns;
-            container.style.gridTemplateRows = root.style.gridTemplateRows;
-            container.style.gridTemplateAreas = root.style.gridTemplateAreas;
+            // 2. Yield to UI render loop before heavy lifting
+            setTimeout(async () => {
+                try {
+                    // --- Export Logic ---
+                    const targetWidth = 3840; const targetHeight = 2160;
+                    const container = document.createElement('div');
+                    container.id = 'exportContainer';
+                    container.style.position = 'fixed'; container.style.left = '100vw'; container.style.top = '0';
+                    container.style.width = targetWidth + 'px'; container.style.height = targetHeight + 'px';
+                    container.style.backgroundColor = '#000000'; // Ensure black background
+                    container.style.display = 'grid'; container.style.gap = '2px'; container.style.padding = '2px';
+                    container.style.overflow = 'hidden';
+                    container.style.boxSizing = 'border-box';
 
-            // Scale font size
-            const scale = targetWidth / root.clientWidth;
-            const computedFontSize = parseFloat(getComputedStyle(document.body).fontSize) || 16;
-            container.style.fontSize = (computedFontSize * scale) + 'px';
+                    // Copy grid styles
+                    const root = document.getElementById('dashboardRoot');
+                    container.style.gridTemplateColumns = root.style.gridTemplateColumns;
+                    container.style.gridTemplateRows = root.style.gridTemplateRows;
+                    container.style.gridTemplateAreas = root.style.gridTemplateAreas;
 
-            document.body.appendChild(container);
+                    // Scale font size
+                    const scale = targetWidth / root.clientWidth;
+                    const computedFontSize = parseFloat(getComputedStyle(document.body).fontSize) || 16;
+                    container.style.fontSize = (computedFontSize * scale) + 'px';
 
-            // Reconstruct Panels
-            const panels = Array.from(root.children);
-            const initPromises = [];
+                    document.body.appendChild(container);
 
-            panels.forEach(p => {
-                const area = p.style.gridArea;
-                const bpName = p.dataset.blueprintName;
-                if (!bpName || !area) return;
+                    // Reconstruct Panels
+                    const panels = Array.from(root.children);
+                    const initPromises = [];
 
-                const bp = panelBlueprints.find(b => b.name === bpName);
-                if (bp) {
-                    const newPanel = bp.func(area);
-                    container.appendChild(newPanel);
+                    panels.forEach(p => {
+                        const area = p.style.gridArea;
+                        const bpName = p.dataset.blueprintName;
+                        if (!bpName || !area) return;
 
-                    // Trigger Init
-                    if (newPanel.initContent) {
-                         initPromises.push(new Promise(resolve => {
-                             requestAnimationFrame(() => {
-                                 newPanel.initContent();
-                                 resolve();
-                             });
-                         }));
-                    }
+                        const bp = panelBlueprints.find(b => b.name === bpName);
+                        if (bp) {
+                            const newPanel = bp.func(area);
+                            container.appendChild(newPanel);
+                            // Ensure full opacity for export
+                            newPanel.style.opacity = '1';
+
+                            // Trigger Init
+                            if (newPanel.initContent) {
+                                 initPromises.push(new Promise(resolve => {
+                                     // Use a slight staggered delay to not choke the event loop all at once
+                                     setTimeout(() => {
+                                         newPanel.initContent();
+                                         resolve();
+                                     }, Math.random() * 50);
+                                 }));
+                            }
+                        }
+                    });
+
+                    await Promise.all(initPromises);
+                    // Wait for animations/canvas draws to settle
+                    await new Promise(r => setTimeout(r, 2000));
+
+                    // 3. Generate Canvas
+                    const canvas = await html2canvas(container, {
+                        scale: 1, // 1:1 with container size
+                        width: targetWidth, height: targetHeight,
+                        windowWidth: targetWidth, windowHeight: targetHeight,
+                        backgroundColor: '#000000',
+                        logging: false,
+                        useCORS: true,
+                        allowTaint: true,
+                        imageTimeout: 0,
+                        onclone: (clonedDoc) => {
+                            // Ensure cloned fonts/styles are applied
+                            const clonedContainer = clonedDoc.getElementById('exportContainer');
+                            if(clonedContainer) clonedContainer.style.transform = 'none';
+                        }
+                    });
+
+                    // 4. Optimize Download (toBlob)
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            throw new Error("Canvas to Blob failed");
+                        }
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.download = 'alien-terminal-wallpaper-4k.png';
+                        link.href = url;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+
+                        // Success Feedback
+                        btn.classList.remove('loading');
+                        btn.innerHTML = originalContent;
+                        btn.title = "Export 4K Wallpaper";
+                    }, 'image/png');
+
+                } catch (err) {
+                    console.error("Export failed:", err);
+                    alert("Export failed: " + err.message);
+                    btn.classList.remove('loading');
+                    btn.innerHTML = originalContent;
+                } finally {
+                     const c = document.getElementById('exportContainer');
+                     if(c) document.body.removeChild(c);
                 }
-            });
-
-            await Promise.all(initPromises);
-            // Wait for animations/canvas draws
-            await new Promise(r => setTimeout(r, 1500));
-
-            try {
-                const canvas = await html2canvas(container, {
-                    scale: 1,
-                    width: targetWidth, height: targetHeight,
-                    windowWidth: targetWidth, windowHeight: targetHeight,
-                    backgroundColor: '#020202',
-                    logging: false,
-                    useCORS: true
-                });
-
-                const link = document.createElement('a');
-                link.download = 'alien-terminal-wallpaper-4k.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-            } catch (err) {
-                console.error("Export failed:", err);
-                alert("Export failed. See console.");
-            } finally {
-                document.body.removeChild(container);
-                btn.style.opacity = ''; btn.style.pointerEvents = '';
-            }
+            }, 100); // 100ms delay to allow UI to render 'loading' state
         });
     </script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-1CQ4D3VQ3L"></script>
