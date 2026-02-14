@@ -2991,45 +2991,70 @@ function createQuantumEntanglementPanel(areaName) {
   gtag('config', 'G-1CQ4D3VQ3L');
 </script>
 
+
+
+
+
 <script>
-    // --- 4K Export Logic ---
+    // --- 4K Export Logic (Glyph Only) ---
+    const ICON_CAMERA = '<svg viewBox="0 0 10 10" class="alien-glyph" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1;"><use xlink:href="#g28"/></svg>'; // Square with dot
+    const ICON_PROCESS = '<svg viewBox="0 0 10 10" class="alien-glyph" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1;"><use xlink:href="#g17"/></svg>'; // Circle with line
+    const ICON_SUCCESS = '<svg viewBox="0 0 10 10" class="alien-glyph" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1;"><use xlink:href="#g22"/></svg>'; // V-shape
+
     const exportBtn = document.createElement('button');
     exportBtn.id = 'export-btn';
-    exportBtn.innerHTML = '📷';
+    exportBtn.innerHTML = ICON_CAMERA;
     exportBtn.title = 'Export 4K Screenshot';
-    exportBtn.style.cssText = 'position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:#333;color:#FFF;font-size:24px;border:2px solid #555;cursor:pointer;z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0.7;transition:opacity 0.2s;box-shadow: 0 0 10px rgba(0,0,0,0.5);';
-    exportBtn.onmouseover = () => exportBtn.style.opacity = '1';
-    exportBtn.onmouseout = () => exportBtn.style.opacity = '0.7';
+    exportBtn.style.cssText = 'position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:#111;color:var(--base-phosphor-color);border:2px solid var(--base-phosphor-color);cursor:pointer;z-index:9999;display:flex;align-items:center;justify-content:center;opacity:0.8;transition:all 0.3s;box-shadow: 0 0 15px var(--panel-glow-color-strong);';
+
+    exportBtn.onmouseover = function() { this.style.opacity = '1'; this.style.transform = 'scale(1.1)'; };
+    exportBtn.onmouseout = function() { this.style.opacity = '0.8'; this.style.transform = 'scale(1)'; };
 
     exportBtn.onclick = function() {
+        if (this.disabled) return;
+        this.disabled = true;
+
+        // 1. STATE: PROCESSING
+        this.innerHTML = ICON_PROCESS;
+        this.style.color = '#FFFFFF';
+        this.style.borderColor = '#FFFFFF';
+
+        // Add spin animation
+        if (!document.getElementById('alien-spin-style')) {
+            const styleSheet = document.createElement("style");
+            styleSheet.id = 'alien-spin-style';
+            styleSheet.innerText = "@keyframes spinAlien { 100% { transform: rotate(360deg); } }";
+            document.head.appendChild(styleSheet);
+        }
+        this.firstChild.style.animation = "spinAlien 1s linear infinite";
+
         // Pause animations
         const canvases = document.querySelectorAll('canvas');
         canvases.forEach(c => { if(c.clearAnimation) c.clearAnimation(); });
 
-        const overlay = document.createElement('div');
-        overlay.id = 'loading-overlay';
-        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);color:#FFB000;display:flex;justify-content:center;align-items:center;z-index:10000;font-family:monospace;font-size:24px;flex-direction:column;gap:10px;';
-        overlay.innerHTML = '<div>FREEZING QUANTUM STATE...</div><div style="font-size:14px;opacity:0.7">Exporting 4K Image</div>';
-        document.body.appendChild(overlay);
-
-        // Allow UI to update
         setTimeout(() => {
-            // Hide overlay for capture
-            overlay.style.visibility = 'hidden';
-            exportBtn.style.visibility = 'hidden';
+            // Hide button for capture
+            this.style.visibility = 'hidden';
 
             html2canvas(document.body, {
-                scale: 2, // 4K density
+                scale: 2,
                 useCORS: true,
                 allowTaint: true,
                 backgroundColor: '#000000',
                 windowWidth: document.documentElement.scrollWidth,
                 windowHeight: document.documentElement.scrollHeight,
-                logging: false
+                logging: false,
+                ignoreElements: (el) => el.id === 'export-btn'
             }).then(canvas => {
-                // Restore UI
-                overlay.style.visibility = 'visible';
-                exportBtn.style.visibility = 'visible';
+                // Restore Button Visibility
+                this.style.visibility = 'visible';
+
+                // 2. STATE: SUCCESS
+                this.firstChild.style.animation = "";
+                this.innerHTML = ICON_SUCCESS;
+                this.style.color = '#00FF00';
+                this.style.borderColor = '#00FF00';
+                this.style.boxShadow = '0 0 25px rgba(0,255,0,0.8)';
 
                 // Download
                 const link = document.createElement('a');
@@ -3037,17 +3062,21 @@ function createQuantumEntanglementPanel(areaName) {
                 link.href = canvas.toDataURL('image/png');
                 link.click();
 
-                overlay.innerHTML = '<div style="color:#00FF00">EXPORT COMPLETE</div>';
+                // 3. REVERT STATE
                 setTimeout(() => {
-                    overlay.remove();
-                    // Optional: reload to restart complex animations cleanly
-                    // location.reload();
-                }, 1500);
+                    this.innerHTML = ICON_CAMERA;
+                    this.style.color = 'var(--base-phosphor-color)';
+                    this.style.borderColor = 'var(--base-phosphor-color)';
+                    this.style.boxShadow = '0 0 15px var(--panel-glow-color-strong)';
+                    this.disabled = false;
+                }, 2000);
+
             }).catch(err => {
                 console.error(err);
-                overlay.innerHTML = '<div style="color:red">EXPORT FAILED</div>';
-                exportBtn.style.visibility = 'visible';
-                setTimeout(() => overlay.remove(), 2000);
+                this.style.visibility = 'visible';
+                this.disabled = false;
+                this.innerHTML = ICON_CAMERA;
+                this.style.color = 'var(--base-phosphor-color)';
             });
         }, 500);
     };
