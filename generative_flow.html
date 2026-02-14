@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Generative Flow Full-Grid 4K Export</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1313ec",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#05050a",
+                        "neon-cyan": "#00f3ff",
+                        "neon-magenta": "#ff00e5",
+                        "panel-bg": "rgba(13, 13, 35, 0.95)",},
+                    fontFamily: {
+                        "display": ["Space Grotesk"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, #1f1f3a 1px, transparent 1px), linear-gradient(to bottom, #1f1f3a 1px, transparent 1px)",
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-background-dark text-slate-100 font-display antialiased selection:bg-neon-cyan/30;
+                min-height: 100vh;
+            }
+        }.glass-panel {
+            background: #08081c;
+            border: 1px solid #00f3ff;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+            position: relative;
+            z-index: 20;
+        }
+        .glow-cyan {
+            box-shadow: 0 0 10px #00f3ff;
+        }
+        .glow-magenta {
+            box-shadow: 0 0 10px #ff00e5;
+        }
+        .scanline {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                transparent 50%,
+                rgba(0, 243, 255, 0.05) 50%
+            );
+            background-size: 100% 4px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 40;
+        }
+        .tactical-border {
+            position: relative;
+        }
+        .tactical-border::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            width: 12px;
+            height: 12px;
+            border-top: 2px solid #00f3ff;
+            border-left: 2px solid #00f3ff;
+            z-index: 50;
+        }
+        .tactical-border::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            right: -1px;
+            width: 12px;
+            height: 12px;
+            border-bottom: 2px solid #ff00e5;
+            border-right: 2px solid #ff00e5;
+            z-index: 50;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #00f3ff;
+            border-radius: 0;box-shadow: 0 0 8px #00f3ff;
+            cursor: pointer;
+        }
+        .sharp-text {
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: none;z-index: 50;
+            position: relative;
+        }
+        .high-z {
+            z-index: 100;
+        }
+        .export-freeze * {
+            animation-play-state: paused !important;
+            transition: none !important;
+        }
+        .export-freeze {
+            cursor: wait;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .alien-glyph {
+            font-family: monospace;
+            letter-spacing: -2px;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+            background-size: 40px 40px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="overflow-y-auto overflow-x-hidden relative">
+<div class="fixed inset-0 z-[1000] bg-black/80 flex items-center justify-center pointer-events-auto hidden" id="loading-overlay">
+<div class="flex flex-col items-center gap-8 w-full max-w-md p-6">
+<div class="relative flex items-center justify-center">
+<div class="w-32 h-32 border-2 border-neon-cyan/20 rounded-full"></div>
+<div class="absolute w-36 h-36 border border-dashed border-neon-cyan/40 rounded-full"></div>
+<div class="absolute w-24 h-24 border-2 border-neon-magenta/60 rounded-full"></div>
+<span class="material-symbols-outlined text-6xl text-neon-cyan drop-shadow-[0_0_25px_#00f3ff] z-10">smart_toy</span>
+</div>
+<div class="text-center space-y-4 w-full">
+<h2 class="text-3xl font-black tracking-[0.2em] text-white uppercase border-b-2 border-neon-cyan pb-2 inline-block">Live Freeze</h2>
+<div class="bg-black/90 border border-neon-cyan p-4 relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-neon-magenta"></div>
+<div class="flex justify-between items-end mb-2">
+<span class="text-xs font-mono text-neon-cyan">RENDER_TARGET</span>
+<span class="text-xs font-mono text-white">alien-terminal-wallpaper-4k.png</span>
+</div>
+<div class="w-full bg-gray-800 h-2 mb-2">
+<div class="bg-neon-cyan h-full w-[85%] shadow-[0_0_10px_#00f3ff]"></div>
+</div>
+<div class="flex justify-between text-[10px] font-mono text-gray-400 uppercase">
+<span>Freezing CSS Grid...</span>
+<span>3840x2160</span>
+</div>
+</div>
+<div class="absolute right-0 top-0 bottom-0 w-1 bg-gray-800 h-full flex flex-col justify-end">
+<div class="bg-neon-magenta w-full h-[85%] shadow-[0_0_15px_#ff00e5]"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed top-20 left-1/2 -translate-x-1/2 z-[1100] w-[90%] max-w-sm pointer-events-auto opacity-0 hidden" id="success-toast">
+<div class="bg-[#050510] border border-neon-cyan p-4 flex items-center gap-4 shadow-[0_0_30px_rgba(0,243,255,0.3)]">
+<div class="w-12 h-12 bg-neon-cyan/10 flex items-center justify-center border border-neon-cyan">
+<span class="material-symbols-outlined text-neon-cyan">save_alt</span>
+</div>
+<div>
+<div class="text-neon-cyan font-bold text-xs tracking-widest mb-1">EXPORT COMPLETE</div>
+<div class="text-white text-[10px] font-mono">alien-terminal-wallpaper-4k.png SAVED</div>
+</div>
+</div>
+</div>
+<div class="sticky top-0 z-[100] bg-[#05050a] border-b border-white/20 h-12 w-full flex justify-between items-center px-6 text-xs font-bold shadow-lg">
+<span class="sharp-text text-neon-cyan tracking-widest">SYS.OVR // LIVE</span>
+<div class="flex gap-4 items-center">
+<div class="flex items-center gap-1">
+<span class="w-1.5 h-1.5 bg-neon-cyan rounded-full animate-none bg-opacity-100"></span>
+<span class="text-[10px] text-white/60">REC</span>
+</div>
+<span class="material-icons text-sm text-white/80">wifi_tethering</span>
+<span class="text-white text-[10px]">100%</span>
+</div>
+</div>
+<main class="flex flex-col p-4 gap-4 pb-24 max-w-xl mx-auto w-full relative">
+<div class="absolute -left-2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-neon-cyan to-transparent opacity-50"></div>
+<div class="absolute -right-2 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-neon-magenta to-transparent opacity-50"></div>
+<header class="flex justify-between items-end mb-2 border-b border-white/10 pb-4">
+<div>
+<h1 class="text-2xl tracking-[0.1em] font-black text-white uppercase leading-none sharp-text mb-1">Generative Flow</h1>
+<div class="flex items-center gap-2">
+<span class="px-1.5 py-0.5 bg-neon-cyan text-black text-[9px] font-bold uppercase">Grid View</span>
+<p class="text-[10px] text-neon-cyan/80 uppercase tracking-widest font-mono font-bold sharp-text">Terminal v9.2</p>
+</div>
+</div>
+<button class="bg-[#00f3ff] text-black px-4 py-2 border-b-2 border-[#0099aa] active:translate-y-px active:border-b-0 transition-none flex items-center gap-2 font-bold text-xs hover:bg-[#ccfcff]" id="export-btn">
+<span class="material-symbols-outlined text-lg">smart_toy</span>
+                EXPORT 4K
+            </button>
+</header>
+<div class="grid grid-cols-2 gap-4">
+<section class="col-span-2 relative aspect-video bg-black border border-neon-cyan/50 overflow-hidden group">
+<div class="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(19,19,236,0.15),transparent)]"></div>
+<div class="scanline opacity-20"></div>
+<div class="w-full h-full relative z-0">
+<img alt="abstract neon network flow" class="w-full h-full object-cover opacity-80 mix-blend-screen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9cEjCTCNLwGXt7mCpNDTqj28ABORUqFDfNYb4pbYs32gPt-ejlgh38ZzYLydnA1mqfP7FUxSDO-uV5nh7f9QpedYoPmeWhUo7YkNljFHEoP-X4qwSmfFeOWlv-ZKJQ1gfSLoDeyZZHhZM3Suj3pg-2RrDs3zImgiaTIdxJpWpc5iiLmrfABMSr13ksYbkrOmfdiQPKWWhrMi0BDbAm5t0SjEXRB2waKYxwojnSUtYbzoKTRPAvLC3yCijLOLVyRxGq_f3huPJZJZ2"/>
+</div>
+<div class="absolute top-0 left-0 p-3 w-full flex justify-between z-10 bg-gradient-to-b from-black/80 to-transparent">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-neon-cyan text-sm">hub</span>
+<span class="text-[10px] font-mono text-neon-cyan font-bold">DATA HUB ALPHA</span>
+</div>
+<div class="text-[10px] font-mono text-white">FPS: <span class="text-neon-magenta">60 [LOCKED]</span></div>
+</div>
+<div class="absolute bottom-4 left-4 z-10 bg-black/80 border border-white/20 p-2 backdrop-blur-none">
+<div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Packet Loss</div>
+<div class="text-2xl font-mono text-white leading-none">0.00%</div>
+</div>
+<div class="absolute bottom-4 right-4 z-10 text-right">
+<div class="text-[40px] font-black text-transparent bg-clip-text bg-gradient-to-t from-neon-cyan to-white leading-none opacity-90">NET.01</div>
+</div>
+</section>
+<section class="col-span-1 glass-panel p-3 flex flex-col justify-between min-h-[140px]">
+<div class="flex items-center gap-2 mb-3 border-b border-white/10 pb-2">
+<span class="material-symbols-outlined text-neon-magenta text-sm">tune</span>
+<h3 class="text-[10px] font-bold text-white uppercase tracking-widest">Controls</h3>
+</div>
+<div class="space-y-4">
+<div class="space-y-1">
+<div class="flex justify-between text-[9px] font-mono text-gray-300 uppercase">
+<span>Core Voltage</span>
+<span class="text-neon-cyan">1.2V</span>
+</div>
+<input class="w-full h-1 bg-gray-700 appearance-none" max="100" min="0" type="range" value="75"/>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between text-[9px] font-mono text-gray-300 uppercase">
+<span>Fan Speed</span>
+<span class="text-neon-magenta">4200</span>
+</div>
+<input class="w-full h-1 bg-gray-700 appearance-none" max="100" min="0" type="range" value="88"/>
+</div>
+</div>
+</section>
+<section class="col-span-1 glass-panel p-3 relative overflow-hidden flex flex-col">
+<div class="absolute top-0 right-0 p-1">
+<div class="w-2 h-2 bg-neon-cyan"></div>
+</div>
+<div class="flex-1 flex flex-col justify-center items-center relative z-10">
+<div class="w-20 h-20 rounded-full border-4 border-gray-800 flex items-center justify-center relative">
+<svg class="absolute inset-0 w-full h-full -rotate-90">
+<circle cx="40" cy="40" fill="none" r="34" stroke="#00f3ff" stroke-dasharray="213" stroke-dashoffset="40" stroke-linecap="butt" stroke-width="4"></circle>
+</svg>
+<div class="flex flex-col items-center">
+<span class="text-xl font-bold text-white">82<span class="text-[10px] align-top">%</span></span>
+<span class="text-[8px] text-gray-400 uppercase">Load</span>
+</div>
+</div>
+</div>
+<div class="mt-2 text-center">
+<div class="text-[9px] font-mono text-neon-cyan bg-black/40 py-1 px-2 inline-block border border-neon-cyan/30">OPTIMAL</div>
+</div>
+</section>
+<section class="col-span-2 glass-panel p-0 flex flex-col h-48 border-t-2 border-t-neon-magenta">
+<div class="bg-black/40 px-3 py-2 border-b border-white/10 flex justify-between items-center">
+<span class="text-[10px] font-bold text-white uppercase tracking-widest flex items-center gap-2">
+<span class="w-1.5 h-1.5 bg-neon-magenta"></span>
+                        Event Log
+                     </span>
+<span class="text-[9px] font-mono text-gray-500">/var/log/sys</span>
+</div>
+<div class="p-3 font-mono text-[10px] space-y-2 overflow-hidden bg-[#020205]">
+<div class="flex gap-2 text-gray-400">
+<span class="text-neon-cyan">[10:42:01]</span>
+<span>Init sequence complete.</span>
+</div>
+<div class="flex gap-2 text-gray-400">
+<span class="text-neon-cyan">[10:42:05]</span>
+<span>Grid layout loaded successfully.</span>
+</div>
+<div class="flex gap-2 text-white bg-neon-magenta/10 border-l-2 border-neon-magenta pl-2 py-1">
+<span class="text-neon-magenta font-bold">[10:44:12]</span>
+<span class="font-bold">EXPORT_REQUEST: 4K_FULL_GRID</span>
+</div>
+<div class="flex gap-2 text-gray-300">
+<span class="text-neon-cyan">[10:44:13]</span>
+<span>Halting animations... OK</span>
+</div>
+<div class="flex gap-2 text-gray-300">
+<span class="text-neon-cyan">[10:44:13]</span>
+<span>Canvas context locked.</span>
+</div>
+<div class="flex gap-2 text-neon-cyan animate-pulse">
+<span class="text-neon-cyan">&gt;_</span>
+<span>Awaiting input...</span>
+</div>
+</div>
+</section>
+</div>
+</main>
+<div class="fixed bottom-0 left-0 w-full h-8 bg-[#05050a] border-t border-white/20 flex justify-center items-center z-50">
+<div class="w-1/3 h-1 bg-gray-800 rounded-full overflow-hidden">
+<div class="w-1/2 h-full bg-gradient-to-r from-neon-cyan to-neon-magenta"></div>
+</div>
+</div>
+<script>
+        document.getElementById('export-btn').addEventListener('click', function() {
+            const body = document.body;
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const successToast = document.getElementById('success-toast');
+            // 1. Freeze animations
+            body.classList.add('export-freeze');
+            // 2. Show loading modal
+            loadingOverlay.classList.remove('hidden');
+            // 3. Delay to settle rendering
+            setTimeout(() => {
+                // Temporarily hide overlay for clean capture
+                loadingOverlay.style.visibility = 'hidden';
+                // Ensure we capture full scroll height
+                const originalHeight = body.style.height;
+                const originalOverflow = body.style.overflow;
+                // Force full height for capture if needed, though html2canvas handles scroll nicely usually
+                // but setting window dimensions helps with 'screenshot' feel
+                const width = body.scrollWidth;
+                const height = body.scrollHeight;
+                html2canvas(document.body, {
+                    scale: 2, // Target 4K-ish resolution / Retina
+                    useCORS: true, // Handle cross-origin images
+                    allowTaint: true,
+                    backgroundColor: '#05050a', // Ensure background isn't transparent
+                    width: width,
+                    height: height,
+                    windowWidth: width,
+                    windowHeight: height,
+                    scrollY: 0,
+                    scrollX: 0,
+                    onclone: (clonedDoc) => {
+                        // Ensure cloned document also has freeze class
+                        clonedDoc.body.classList.add('export-freeze');
+                    }
+                }).then(canvas => {
+                    // Restore overlay visibility (though we are about to hide it anyway, good practice if logic changes)
+                    loadingOverlay.style.visibility = 'visible';
+                    loadingOverlay.classList.add('hidden');
+                    // Save file
+                    const link = document.createElement('a');
+                    link.download = 'alien-terminal-wallpaper-4k.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    // Show success message
+                    successToast.classList.remove('hidden');
+                    successToast.classList.remove('opacity-0'); // Handle potential opacity classes if present
+                    successToast.style.opacity = '1';
+                    successToast.classList.add('animate-[pulse_1s_ease-in-out_infinite]'); // Re-add animation if removed
+                    // Hide success toast after 3s
+                    setTimeout(() => {
+                        successToast.style.opacity = '0';
+                        setTimeout(() => successToast.classList.add('hidden'), 500);
+                    }, 3000);
+                    // Resume animations
+                    body.classList.remove('export-freeze');
+                }).catch(err => {
+                    console.error("Export failed:", err);
+                    loadingOverlay.classList.add('hidden');
+                    body.classList.remove('export-freeze');
+                    alert("Export failed. Check console.");
+                });
+            }, 100);
+        });
+    </script>
+
+</body></html>
