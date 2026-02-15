@@ -3317,6 +3317,18 @@ function createQuantumEntanglementPanel(areaName) {
                 }
 
 
+                if (!gridTemplateAreas || gridTemplateAreas.trim() === "") {
+                    console.warn("Layout fallback triggered for type: " + layoutType);
+                    gridTemplateColumns = "1fr 1fr";
+                    gridTemplateRows = "1fr 1fr";
+                    gridTemplateAreas = '"main main" "aux aux"';
+                    // Ensure content
+                    if (dashboardRoot.children.length < 2) {
+                         dashboardRoot.innerHTML = '';
+                         dashboardRoot.appendChild(getNextPanel('main').func('main'));
+                         dashboardRoot.appendChild(getNextPanel('aux').func('aux'));
+                    }
+                }
                 dashboardRoot.style.gridTemplateAreas = gridTemplateAreas;
                 dashboardRoot.style.gridTemplateColumns = gridTemplateColumns;
                 dashboardRoot.style.gridTemplateRows = gridTemplateRows;
@@ -3427,7 +3439,7 @@ function createQuantumEntanglementPanel(areaName) {
                 onclone: (clonedDoc) => {
                     // Inject Bold Scanlines into Clone Only
                     const scanlineDiv = clonedDoc.createElement('div');
-                    scanlineDiv.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;background-image:repeating-linear-gradient(transparent 0px, rgba(' + baseRGB + ', 0.16) 1px, rgba(' + baseRGB + ', 0.30) 2px, rgba(' + baseRGB + ', 0.16) 3px, transparent 4px), radial-gradient(ellipse at center, rgba(0,0,0,0) 65%, rgba(0,0,0,0.4) 100%);background-size: 100% 4px, 100% 100%;';
+                    scanlineDiv.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;background-image:repeating-linear-gradient(transparent 0px, rgba(' + baseRGB + ', 0.40) 1px, rgba(' + baseRGB + ', 0.50) 2px, rgba(' + baseRGB + ', 0.40) 3px, transparent 4px), radial-gradient(ellipse at center, rgba(0,0,0,0) 65%, rgba(0,0,0,0.5) 100%);background-size: 100% 4px, 100% 100%;';
                     scanlineDiv.style.height = clonedDoc.documentElement.scrollHeight + 'px';
                     clonedDoc.body.appendChild(scanlineDiv);
 
