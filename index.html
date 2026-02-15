@@ -2833,8 +2833,23 @@ function createQuantumEntanglementPanel(areaName) {
                     }
                 });
 
-                window.currentLayoutId = Math.floor(Math.random() * 50); const layoutType = window.currentLayoutId;
+                window.currentLayoutId = Math.floor(Math.random() * 50);
+                let layoutType = window.currentLayoutId;
                 let gridTemplateAreas, gridTemplateColumns, gridTemplateRows;
+
+                const applySafeLayout = () => {
+                    console.warn("Applying Safe Layout (Layout 0) due to error.");
+                    layoutType = 0;
+                    dashboardRoot.innerHTML = '';
+                    gridTemplateColumns = "1fr 2fr 1fr"; gridTemplateRows = "1fr 1fr 1fr";
+                    gridTemplateAreas = `"aux1 main aux2" "aux3 main aux4" "aux5 main aux6"`;
+                    dashboardRoot.appendChild(getNextPanel('main').func('main'));
+                    ['aux1', 'aux2', 'aux3', 'aux4', 'aux5', 'aux6'].forEach(area => {
+                        dashboardRoot.appendChild(getNextPanel('aux', area === 'aux2' && !alertPanelUsed ? 'Alert' : null).func(area));
+                    });
+                };
+
+                try {
 
                 const allPanelBlueprints = [...panelBlueprints];
                 for (let i = allPanelBlueprints.length - 1; i > 0; i--) {
@@ -3314,6 +3329,15 @@ function createQuantumEntanglementPanel(areaName) {
                     dashboardRoot.appendChild(getNextPanel('aux', 'Alert').func('alert'));
                     dashboardRoot.appendChild(getNextPanel('aux').func('c3'));
                     dashboardRoot.appendChild(getNextPanel('aux').func('c4'));
+                }
+                } catch (error) {
+                    console.error("Critical error building layout " + layoutType + ":", error);
+                    applySafeLayout();
+                }
+
+                if (dashboardRoot.children.length < 2) {
+                     console.error("Dashboard empty after layout build. Forcing safe layout.");
+                     applySafeLayout();
                 }
 
 
