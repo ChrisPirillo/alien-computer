@@ -2375,6 +2375,7 @@ function createQuantumEntanglementPanel(areaName) {
 
 
 
+
         // 51. Hyper-Wave Tuner
         function createHyperWaveTunerPanel(areaName) {
             const { panel } = createPanelShell('hyper-wave', areaName);
@@ -2394,7 +2395,7 @@ function createQuantumEntanglementPanel(areaName) {
                 ctx.clearRect(0,0,w,h);
                 const baseRGB = getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim();
 
-                ctx.strokeStyle = ;
+                ctx.strokeStyle = `rgba(${baseRGB}, 0.8)`;
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 for(let x=0; x<w; x+=2){
@@ -2404,7 +2405,7 @@ function createQuantumEntanglementPanel(areaName) {
                 ctx.stroke();
 
                 // Tuner lines
-                ctx.strokeStyle = ;
+                ctx.strokeStyle = `rgba(${baseRGB}, 0.2)`;
                 ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
 
                 phase += 0.1;
@@ -2438,7 +2439,7 @@ function createQuantumEntanglementPanel(areaName) {
                 // Scanning arc
                 ctx.beginPath();
                 ctx.arc(cx, cy, r, angle, angle + 0.5);
-                ctx.strokeStyle = ;
+                ctx.strokeStyle = `rgba(${baseRGB}, 1)`;
                 ctx.lineWidth = 4;
                 ctx.stroke();
 
@@ -2446,7 +2447,7 @@ function createQuantumEntanglementPanel(areaName) {
                 if (Math.random() < 0.05) {
                     ctx.beginPath(); ctx.moveTo(cx,cy);
                     ctx.lineTo(cx + Math.cos(angle)*r, cy + Math.sin(angle)*r);
-                    ctx.strokeStyle = ;
+                    ctx.strokeStyle = `rgba(${baseRGB}, 0.5)`;
                     ctx.lineWidth = 1;
                     ctx.stroke();
                 }
@@ -2481,11 +2482,11 @@ function createQuantumEntanglementPanel(areaName) {
                     temps[i] = Math.max(0.1, Math.min(0.9, temps[i]));
 
                     const barH = h * temps[i];
-                    ctx.fillStyle = ;
+                    ctx.fillStyle = `rgba(${baseRGB}, 0.4)`;
                     ctx.fillRect(i*barW + 1, h - barH, barW - 2, barH);
 
                     // Cap
-                    ctx.fillStyle = ;
+                    ctx.fillStyle = `rgba(${baseRGB}, 0.9)`;
                     ctx.fillRect(i*barW + 1, h - barH, barW - 2, 2);
                 });
 
@@ -2519,13 +2520,13 @@ function createQuantumEntanglementPanel(areaName) {
                     n.x += n.vx; n.y += n.vy;
                     if(n.x<0||n.x>w) n.vx*=-1; if(n.y<0||n.y>h) n.vy*=-1;
 
-                    ctx.fillStyle = ;
+                    ctx.fillStyle = `rgba(${baseRGB}, 0.8)`;
                     ctx.beginPath(); ctx.arc(n.x, n.y, 2, 0, Math.PI*2); ctx.fill();
 
                     nodes.forEach(n2 => {
                         const d = Math.hypot(n.x-n2.x, n.y-n2.y);
                         if(d < 60) {
-                            ctx.strokeStyle = ;
+                            ctx.strokeStyle = `rgba(${baseRGB}, ${1 - d/60})`;
                             ctx.lineWidth = 0.5;
                             ctx.beginPath(); ctx.moveTo(n.x,n.y); ctx.lineTo(n2.x,n2.y); ctx.stroke();
                         }
@@ -2568,7 +2569,7 @@ function createQuantumEntanglementPanel(areaName) {
                     p.x += Math.cos(p.angle)*p.speed;
                     p.y += Math.sin(p.angle)*p.speed;
 
-                    ctx.fillStyle = ;
+                    ctx.fillStyle = `rgba(${baseRGB}, 1)`;
                     ctx.fillRect(p.x, p.y, 2, 2);
 
                     if(p.x<0||p.x>w||p.y<0||p.y>h) particles.splice(i,1);
@@ -2598,7 +2599,7 @@ function createQuantumEntanglementPanel(areaName) {
                 const cx = w/2, cy = h/2;
 
                 // Draw grid distorted by gravity
-                ctx.strokeStyle = ;
+                ctx.strokeStyle = `rgba(${baseRGB}, 0.3)`;
                 ctx.lineWidth = 1;
 
                 for(let r=10; r<Math.min(w,h); r+=15) {
@@ -2639,7 +2640,7 @@ function createQuantumEntanglementPanel(areaName) {
                 ctx.clearRect(0,0,w,h);
                 const baseRGB = getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim();
 
-                ctx.fillStyle = ;
+                ctx.fillStyle = `rgba(${baseRGB}, 0.6)`;
 
                 for(let i=0; i<plasma.length; i++) {
                     plasma[i] += (Math.random()-0.5)*4;
@@ -2648,7 +2649,7 @@ function createQuantumEntanglementPanel(areaName) {
                 }
 
                 // Core
-                ctx.fillStyle = ;
+                ctx.fillStyle = `rgba(255,255,255, 0.5)`;
                 ctx.fillRect(0, h*0.9, w, h*0.1);
 
                 animFrame = requestAnimationFrame(()=>drawPlasma(canvasEl));
@@ -2677,12 +2678,12 @@ function createQuantumEntanglementPanel(areaName) {
                 const ms = now % 1000;
 
                 ctx.font = '20px monospace';
-                ctx.fillStyle = ;
+                ctx.fillStyle = `rgba(${baseRGB}, 1)`;
                 ctx.textAlign = 'center';
-                ctx.fillText(, w/2, h/2);
+                ctx.fillText(`OFFSET: ${ms}ms`, w/2, h/2);
 
                 // Circles
-                ctx.strokeStyle = ;
+                ctx.strokeStyle = `rgba(${baseRGB}, 0.5)`;
                 ctx.beginPath(); ctx.arc(w/2, h/2, (ms/1000)*(h/2), 0, Math.PI*2); ctx.stroke();
 
                 animFrame = requestAnimationFrame(()=>drawChrono(canvasEl));
@@ -2711,7 +2712,7 @@ function createQuantumEntanglementPanel(areaName) {
                 for(let x=0; x<w; x+=spacing) {
                     for(let y=0; y<h; y+=spacing) {
                         if ((x+y)%40 === 0 && Math.random() > 0.1) continue;
-                        ctx.fillStyle = ;
+                        ctx.fillStyle = `rgba(${baseRGB}, ${Math.random()})`;
                         ctx.fillRect(x,y,2,2);
                     }
                 }
@@ -2742,7 +2743,7 @@ function createQuantumEntanglementPanel(areaName) {
 
                 parts.forEach((p,i) => {
                     p.y += p.vy;
-                    ctx.strokeStyle = ;
+                    ctx.strokeStyle = `rgba(${baseRGB}, 0.8)`;
                     ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x, p.y-5); ctx.stroke();
                     if(p.y>h) parts.splice(i,1);
                 });
