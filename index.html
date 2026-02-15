@@ -2374,6 +2374,385 @@ function createQuantumEntanglementPanel(areaName) {
         }
 
 
+
+        // 51. Hyper-Wave Tuner
+        function createHyperWaveTunerPanel(areaName) {
+            const { panel } = createPanelShell('hyper-wave', areaName);
+            const canvas = document.createElement('canvas'); canvas.className = 'hyper-wave-canvas'; panel.appendChild(canvas);
+            let animFrame; let phase = 0;
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
+            canvas.restartAnimation = () => { if (!animFrame) initWave(canvas); };
+            function initWave(w,h){
+                phase = 0;
+                drawWave(canvas);
+            }
+            function drawWave(canvasEl){
+                if (!canvasEl.isConnected) { if(animFrame) cancelAnimationFrame(animFrame); animFrame = null; return; }
+                const ctx = canvasEl.getContext('2d'); const w = canvasEl.width, h = canvasEl.height;
+                if(w <= 0 || h <= 0) { animFrame = requestAnimationFrame(()=>drawWave(canvasEl)); return; }
+
+                ctx.clearRect(0,0,w,h);
+                const baseRGB = getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim();
+
+                ctx.strokeStyle = ;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                for(let x=0; x<w; x+=2){
+                    const y = h/2 + Math.sin(x*0.05 + phase) * (h/3) * Math.sin(x*0.01 - phase*0.5);
+                    if(x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                }
+                ctx.stroke();
+
+                // Tuner lines
+                ctx.strokeStyle = ;
+                ctx.beginPath(); ctx.moveTo(0, h/2); ctx.lineTo(w, h/2); ctx.stroke();
+
+                phase += 0.1;
+                animFrame = requestAnimationFrame(()=>drawWave(canvasEl));
+            }
+            panel.initContent = () => initCanvasPanel(panel, canvas, drawWave, initWave);
+            return panel;
+        }
+
+        // 52. Void Sector Scan
+        function createVoidSectorScanPanel(areaName) {
+            const { panel } = createPanelShell('void-sector', areaName);
+            const canvas = document.createElement('canvas'); canvas.className = 'void-sector-canvas'; panel.appendChild(canvas);
+            let animFrame; let angle = 0;
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
+            canvas.restartAnimation = () => { if (!animFrame) initScan(canvas); };
+            function initScan(w,h){ drawScan(canvas); }
+            function drawScan(canvasEl){
+                if (!canvasEl.isConnected) { if(animFrame) cancelAnimationFrame(animFrame); animFrame = null; return; }
+                const ctx = canvasEl.getContext('2d'); const w = canvasEl.width, h = canvasEl.height;
+                if(w<=0||h<=0) { animFrame = requestAnimationFrame(()=>drawScan(canvasEl)); return; }
+
+                // Fade effect
+                ctx.fillStyle = 'rgba(0,0,0,0.1)';
+                ctx.fillRect(0,0,w,h);
+
+                const baseRGB = getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim();
+                const cx = w/2, cy = h/2;
+                const r = Math.min(w,h)*0.4;
+
+                // Scanning arc
+                ctx.beginPath();
+                ctx.arc(cx, cy, r, angle, angle + 0.5);
+                ctx.strokeStyle = ;
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                // Sector lines
+                if (Math.random() < 0.05) {
+                    ctx.beginPath(); ctx.moveTo(cx,cy);
+                    ctx.lineTo(cx + Math.cos(angle)*r, cy + Math.sin(angle)*r);
+                    ctx.strokeStyle = ;
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                }
+
+                angle += 0.05;
+                animFrame = requestAnimationFrame(()=>drawScan(canvasEl));
+            }
+            panel.initContent = () => initCanvasPanel(panel, canvas, drawScan, initScan);
+            return panel;
+        }
+
+        // 53. Cryo-Stasis Monitor
+        function createCryoStasisMonitorPanel(areaName) {
+            const { panel } = createPanelShell('cryo-stasis', areaName);
+            const canvas = document.createElement('canvas'); canvas.className = 'cryo-canvas'; panel.appendChild(canvas);
+            let animFrame; let temps = [];
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
+            canvas.restartAnimation = () => { if (!animFrame) initCryo(canvas); };
+            function initCryo(w,h){ temps = new Array(20).fill(0).map(()=>Math.random()); drawCryo(canvas); }
+            function drawCryo(canvasEl){
+                if (!canvasEl.isConnected) { if(animFrame) cancelAnimationFrame(animFrame); animFrame = null; return; }
+                const ctx = canvasEl.getContext('2d'); const w = canvasEl.width, h = canvasEl.height;
+                if(w<=0||h<=0) { animFrame = requestAnimationFrame(()=>drawCryo(canvasEl)); return; }
+
+                ctx.clearRect(0,0,w,h);
+                const baseRGB = getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim();
+
+                const barW = w / temps.length;
+                temps.forEach((t, i) => {
+                    // Fluctuate
+                    temps[i] += (Math.random()-0.5)*0.02;
+                    temps[i] = Math.max(0.1, Math.min(0.9, temps[i]));
+
+                    const barH = h * temps[i];
+                    ctx.fillStyle = ;
+                    ctx.fillRect(i*barW + 1, h - barH, barW - 2, barH);
+
+                    // Cap
+                    ctx.fillStyle = ;
+                    ctx.fillRect(i*barW + 1, h - barH, barW - 2, 2);
+                });
+
+                animFrame = requestAnimationFrame(()=>drawCryo(canvasEl));
+            }
+            panel.initContent = () => initCanvasPanel(panel, canvas, drawCryo, initCryo);
+            return panel;
+        }
+
+        // 54. Neural Synapse Link
+        function createNeuralSynapsePanel(areaName) {
+            const { panel } = createPanelShell('neural-link', areaName);
+            const canvas = document.createElement('canvas'); canvas.className = 'neural-canvas'; panel.appendChild(canvas);
+            let animFrame; let nodes = [];
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
+            canvas.restartAnimation = () => { if (!animFrame) initNeural(canvas); };
+            function initNeural(w,h){
+                nodes = [];
+                for(let i=0; i<10; i++) nodes.push({x: Math.random()*w, y: Math.random()*h, vx: (Math.random()-0.5), vy: (Math.random()-0.5)});
+                drawNeural(canvas);
+            }
+            function drawNeural(canvasEl){
+                if (!canvasEl.isConnected) { if(animFrame) cancelAnimationFrame(animFrame); animFrame = null; return; }
+                const ctx = canvasEl.getContext('2d'); const w = canvasEl.width, h = canvasEl.height;
+                if(w<=0||h<=0) { animFrame = requestAnimationFrame(()=>drawNeural(canvasEl)); return; }
+
+                ctx.clearRect(0,0,w,h);
+                const baseRGB = getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim();
+
+                nodes.forEach(n => {
+                    n.x += n.vx; n.y += n.vy;
+                    if(n.x<0||n.x>w) n.vx*=-1; if(n.y<0||n.y>h) n.vy*=-1;
+
+                    ctx.fillStyle = ;
+                    ctx.beginPath(); ctx.arc(n.x, n.y, 2, 0, Math.PI*2); ctx.fill();
+
+                    nodes.forEach(n2 => {
+                        const d = Math.hypot(n.x-n2.x, n.y-n2.y);
+                        if(d < 60) {
+                            ctx.strokeStyle = ;
+                            ctx.lineWidth = 0.5;
+                            ctx.beginPath(); ctx.moveTo(n.x,n.y); ctx.lineTo(n2.x,n2.y); ctx.stroke();
+                        }
+                    });
+                });
+
+                animFrame = requestAnimationFrame(()=>drawNeural(canvasEl));
+            }
+            panel.initContent = () => initCanvasPanel(panel, canvas, drawNeural, initNeural);
+            return panel;
+        }
+
+        // 55. Tachyon Field Emitter
+        function createTachyonFieldPanel(areaName) {
+            const { panel } = createPanelShell('tachyon-field', areaName);
+            const canvas = document.createElement('canvas'); canvas.className = 'tachyon-canvas'; panel.appendChild(canvas);
+            let animFrame; let particles = [];
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
+            canvas.restartAnimation = () => { if (!animFrame) initTachyon(canvas); };
+            function initTachyon(w,h){
+                particles = [];
+                drawTachyon(canvas);
+            }
+            function drawTachyon(canvasEl){
+                if (!canvasEl.isConnected) { if(animFrame) cancelAnimationFrame(animFrame); animFrame = null; return; }
+                const ctx = canvasEl.getContext('2d'); const w = canvasEl.width, h = canvasEl.height;
+                if(w<=0||h<=0) { animFrame = requestAnimationFrame(()=>drawTachyon(canvasEl)); return; }
+
+                // Trail
+                ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                ctx.fillRect(0,0,w,h);
+
+                const baseRGB = getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim();
+
+                if (particles.length < 50) {
+                    particles.push({x: w/2, y: h/2, angle: Math.random()*Math.PI*2, speed: Math.random()*5+2});
+                }
+
+                particles.forEach((p, i) => {
+                    p.x += Math.cos(p.angle)*p.speed;
+                    p.y += Math.sin(p.angle)*p.speed;
+
+                    ctx.fillStyle = ;
+                    ctx.fillRect(p.x, p.y, 2, 2);
+
+                    if(p.x<0||p.x>w||p.y<0||p.y>h) particles.splice(i,1);
+                });
+
+                animFrame = requestAnimationFrame(()=>drawTachyon(canvasEl));
+            }
+            panel.initContent = () => initCanvasPanel(panel, canvas, drawTachyon, initTachyon);
+            return panel;
+        }
+
+        // 56. Gravity Well Simulation
+        function createGravityWellPanel(areaName) {
+            const { panel } = createPanelShell('gravity-well', areaName);
+            const canvas = document.createElement('canvas'); canvas.className = 'gravity-canvas'; panel.appendChild(canvas);
+            let animFrame; let t = 0;
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
+            canvas.restartAnimation = () => { if (!animFrame) initGravity(canvas); };
+            function initGravity(w,h){ t=0; drawGravity(canvas); }
+            function drawGravity(canvasEl){
+                if (!canvasEl.isConnected) { if(animFrame) cancelAnimationFrame(animFrame); animFrame = null; return; }
+                const ctx = canvasEl.getContext('2d'); const w = canvasEl.width, h = canvasEl.height;
+                if(w<=0||h<=0) { animFrame = requestAnimationFrame(()=>drawGravity(canvasEl)); return; }
+
+                ctx.clearRect(0,0,w,h);
+                const baseRGB = getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim();
+                const cx = w/2, cy = h/2;
+
+                // Draw grid distorted by gravity
+                ctx.strokeStyle = ;
+                ctx.lineWidth = 1;
+
+                for(let r=10; r<Math.min(w,h); r+=15) {
+                    ctx.beginPath();
+                    for(let a=0; a<Math.PI*2; a+=0.1) {
+                        const dist = r + Math.sin(a*5 + t)*5;
+                        const x = cx + Math.cos(a)*dist;
+                        const y = cy + Math.sin(a)*dist;
+                        if(a===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+                    }
+                    ctx.closePath();
+                    ctx.stroke();
+                }
+
+                t -= 0.05;
+                animFrame = requestAnimationFrame(()=>drawGravity(canvasEl));
+            }
+            panel.initContent = () => initCanvasPanel(panel, canvas, drawGravity, initGravity);
+            return panel;
+        }
+
+        // 57. Plasma Injector Control
+        function createPlasmaInjectorPanel(areaName) {
+            const { panel } = createPanelShell('plasma-inj', areaName);
+            const canvas = document.createElement('canvas'); canvas.className = 'plasma-canvas'; panel.appendChild(canvas);
+            let animFrame; let plasma = [];
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
+            canvas.restartAnimation = () => { if (!animFrame) initPlasma(canvas); };
+            function initPlasma(w,h){
+                plasma = new Array(Math.floor(w/4)).fill(0).map(()=>h/2);
+                drawPlasma(canvas);
+            }
+            function drawPlasma(canvasEl){
+                if (!canvasEl.isConnected) { if(animFrame) cancelAnimationFrame(animFrame); animFrame = null; return; }
+                const ctx = canvasEl.getContext('2d'); const w = canvasEl.width, h = canvasEl.height;
+                if(w<=0||h<=0) { animFrame = requestAnimationFrame(()=>drawPlasma(canvasEl)); return; }
+
+                ctx.clearRect(0,0,w,h);
+                const baseRGB = getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim();
+
+                ctx.fillStyle = ;
+
+                for(let i=0; i<plasma.length; i++) {
+                    plasma[i] += (Math.random()-0.5)*4;
+                    plasma[i] = Math.max(h*0.2, Math.min(h*0.8, plasma[i]));
+                    ctx.fillRect(i*4, plasma[i], 3, h-plasma[i]);
+                }
+
+                // Core
+                ctx.fillStyle = ;
+                ctx.fillRect(0, h*0.9, w, h*0.1);
+
+                animFrame = requestAnimationFrame(()=>drawPlasma(canvasEl));
+            }
+            panel.initContent = () => initCanvasPanel(panel, canvas, drawPlasma, initPlasma);
+            return panel;
+        }
+
+        // 58. Chrono-Sync Offset
+        function createChronoSyncPanel(areaName) {
+            const { panel } = createPanelShell('chrono-sync', areaName);
+            const canvas = document.createElement('canvas'); canvas.className = 'chrono-canvas'; panel.appendChild(canvas);
+            let animFrame; let time = Date.now();
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
+            canvas.restartAnimation = () => { if (!animFrame) initChrono(canvas); };
+            function initChrono(w,h){ drawChrono(canvas); }
+            function drawChrono(canvasEl){
+                if (!canvasEl.isConnected) { if(animFrame) cancelAnimationFrame(animFrame); animFrame = null; return; }
+                const ctx = canvasEl.getContext('2d'); const w = canvasEl.width, h = canvasEl.height;
+                if(w<=0||h<=0) { animFrame = requestAnimationFrame(()=>drawChrono(canvasEl)); return; }
+
+                ctx.clearRect(0,0,w,h);
+                const baseRGB = getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim();
+
+                const now = Date.now();
+                const ms = now % 1000;
+
+                ctx.font = '20px monospace';
+                ctx.fillStyle = ;
+                ctx.textAlign = 'center';
+                ctx.fillText(, w/2, h/2);
+
+                // Circles
+                ctx.strokeStyle = ;
+                ctx.beginPath(); ctx.arc(w/2, h/2, (ms/1000)*(h/2), 0, Math.PI*2); ctx.stroke();
+
+                animFrame = requestAnimationFrame(()=>drawChrono(canvasEl));
+            }
+            panel.initContent = () => initCanvasPanel(panel, canvas, drawChrono, initChrono);
+            return panel;
+        }
+
+        // 59. Sub-Atomic Lattice
+        function createLatticePanel(areaName) {
+            const { panel } = createPanelShell('lattice', areaName);
+            const canvas = document.createElement('canvas'); canvas.className = 'lattice-canvas'; panel.appendChild(canvas);
+            let animFrame;
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
+            canvas.restartAnimation = () => { if (!animFrame) initLattice(canvas); };
+            function initLattice(w,h){ drawLattice(canvas); }
+            function drawLattice(canvasEl){
+                if (!canvasEl.isConnected) { if(animFrame) cancelAnimationFrame(animFrame); animFrame = null; return; }
+                const ctx = canvasEl.getContext('2d'); const w = canvasEl.width, h = canvasEl.height;
+                if(w<=0||h<=0) { animFrame = requestAnimationFrame(()=>drawLattice(canvasEl)); return; }
+
+                ctx.clearRect(0,0,w,h);
+                const baseRGB = getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim();
+
+                const spacing = 20;
+                for(let x=0; x<w; x+=spacing) {
+                    for(let y=0; y<h; y+=spacing) {
+                        if ((x+y)%40 === 0 && Math.random() > 0.1) continue;
+                        ctx.fillStyle = ;
+                        ctx.fillRect(x,y,2,2);
+                    }
+                }
+
+                animFrame = requestAnimationFrame(()=>drawLattice(canvasEl));
+            }
+            panel.initContent = () => initCanvasPanel(panel, canvas, drawLattice, initLattice);
+            return panel;
+        }
+
+        // 60. Dark Matter Siphon
+        function createDarkMatterPanel(areaName) {
+            const { panel } = createPanelShell('dark-matter', areaName);
+            const canvas = document.createElement('canvas'); canvas.className = 'dm-canvas'; panel.appendChild(canvas);
+            let animFrame; let parts = [];
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
+            canvas.restartAnimation = () => { if (!animFrame) initDM(canvas); };
+            function initDM(w,h){ parts = []; drawDM(canvas); }
+            function drawDM(canvasEl){
+                if (!canvasEl.isConnected) { if(animFrame) cancelAnimationFrame(animFrame); animFrame = null; return; }
+                const ctx = canvasEl.getContext('2d'); const w = canvasEl.width, h = canvasEl.height;
+                if(w<=0||h<=0) { animFrame = requestAnimationFrame(()=>drawDM(canvasEl)); return; }
+
+                ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.fillRect(0,0,w,h); // Trails
+                const baseRGB = getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim();
+
+                if(Math.random()<0.2) parts.push({x: Math.random()*w, y: 0, vy: Math.random()*2+1});
+
+                parts.forEach((p,i) => {
+                    p.y += p.vy;
+                    ctx.strokeStyle = ;
+                    ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x, p.y-5); ctx.stroke();
+                    if(p.y>h) parts.splice(i,1);
+                });
+
+                animFrame = requestAnimationFrame(()=>drawDM(canvasEl));
+            }
+            panel.initContent = () => initCanvasPanel(panel, canvas, drawDM, initDM);
+            return panel;
+        }
+
         // --- Panel Blueprints (50 types) ---
         const panelBlueprints = [
             // Main display types
@@ -3036,6 +3415,12 @@ function createQuantumEntanglementPanel(areaName) {
         setTimeout(() => {
             // Hide button for capture
             exportBtn.style.visibility = 'hidden';
+            // Create temporary scanline overlay for export
+            const scanlineDiv = document.createElement('div');
+            scanlineDiv.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;background-image:repeating-linear-gradient(transparent 0px, rgba(' + getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim() + ', 0.08) 1px, rgba(' + getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim() + ', 0.15) 2px, rgba(' + getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim() + ', 0.08) 3px, transparent 4px), radial-gradient(ellipse at center, rgba(0,0,0,0) 65%, rgba(0,0,0,0.3) 100%);background-size: 100% 4px, 100% 100%;';
+            scanlineDiv.style.height = document.documentElement.scrollHeight + 'px';
+            document.body.appendChild(scanlineDiv);
+
 
             html2canvas(document.body, {
                 scale: 2,
@@ -3047,6 +3432,9 @@ function createQuantumEntanglementPanel(areaName) {
                 logging: false,
                 ignoreElements: (el) => el.id === 'export-btn'
             }).then(canvas => {
+                // Remove temp scanlines
+                if(scanlineDiv) scanlineDiv.remove();
+
                 // Restore Button Visibility
                 exportBtn.style.visibility = 'visible';
 
@@ -3079,6 +3467,7 @@ function createQuantumEntanglementPanel(areaName) {
                 }, 2000);
 
             }).catch(err => {
+                if(scanlineDiv) scanlineDiv.remove();
                 console.error(err);
                 exportBtn.style.visibility = 'visible';
                 exportBtn.disabled = false;
