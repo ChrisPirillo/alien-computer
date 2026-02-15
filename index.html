@@ -49,6 +49,7 @@
     </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap');
 
@@ -2859,46 +2860,30 @@ function createQuantumEntanglementPanel(areaName) {
                 let alertPanelUsed = false;
 
                 function getNextPanel(preferredType = 'aux', specificName = null) {
-                    if (specificName === 'Alert' && alertPanelUsed) {
-                        preferredType = 'aux';
-                        specificName = null;
-                    }
-
-                    if (specificName) {
-                        let specificBlueprint = availableMainPanels.find(p => p.name === specificName);
-                        if (specificBlueprint) {
-                            if (specificName === 'Alert') alertPanelUsed = true;
-                            if (specificName !== 'Alert') availableMainPanels = availableMainPanels.filter(p => p.name !== specificName);
-                            return specificBlueprint;
-                        }
-                        specificBlueprint = availableAuxPanels.find(p => p.name === specificName);
-                         if (specificBlueprint) {
-                            if (specificName === 'Alert') alertPanelUsed = true;
-                            if (specificName !== 'Alert') availableAuxPanels = availableAuxPanels.filter(p => p.name !== specificName);
-                            return specificBlueprint;
-                        }
-                    }
-
-                    if (preferredType === 'main' && availableMainPanels.length > 0) {
-                        const panelBp = availableMainPanels[mainPanelCounter % availableMainPanels.length];
-                         if (panelBp.name === 'Alert') {
-                            if (alertPanelUsed) { mainPanelCounter++; return getNextPanel('main');}
-                            alertPanelUsed = true;
-                        }
-                        mainPanelCounter++; return panelBp;
-                    }
-                    if (availableAuxPanels.length > 0) {
-                        const panelBp = availableAuxPanels[auxPanelCounter % availableAuxPanels.length];
-                        if (panelBp.name === 'Alert') {
-                            if (alertPanelUsed) { auxPanelCounter++; return getNextPanel('aux'); }
-                            alertPanelUsed = true;
-                        }
-                        auxPanelCounter++; return panelBp;
-                    }
-                    if (preferredType === 'main' && availableAuxPanels.length > 0) return getNextPanel('aux');
-                    if (preferredType === 'aux' && availableMainPanels.length > 0) return getNextPanel('main');
-
-                    return panelBlueprints[Math.floor(Math.random() * panelBlueprints.length)];
+                    const _getBp = (pType, sName) => {
+                         if (sName === 'Alert' && alertPanelUsed) { pType = 'aux'; sName = null; }
+                         if (sName) {
+                            let sb = availableMainPanels.find(p => p.name === sName);
+                            if (sb) { if (sName === 'Alert') alertPanelUsed = true; else availableMainPanels = availableMainPanels.filter(p => p.name !== sName); return sb; }
+                            sb = availableAuxPanels.find(p => p.name === sName);
+                            if (sb) { if (sName === 'Alert') alertPanelUsed = true; else availableAuxPanels = availableAuxPanels.filter(p => p.name !== sName); return sb; }
+                         }
+                         if (pType === 'main' && availableMainPanels.length > 0) {
+                             const pb = availableMainPanels[mainPanelCounter % availableMainPanels.length];
+                             if (pb.name === 'Alert') { if(alertPanelUsed) { mainPanelCounter++; return _getBp('main'); } alertPanelUsed=true; }
+                             mainPanelCounter++; return pb;
+                         }
+                         if (availableAuxPanels.length > 0) {
+                             const pb = availableAuxPanels[auxPanelCounter % availableAuxPanels.length];
+                             if (pb.name === 'Alert') { if(alertPanelUsed) { auxPanelCounter++; return _getBp('aux'); } alertPanelUsed=true; }
+                             auxPanelCounter++; return pb;
+                         }
+                         if (pType === 'main' && availableAuxPanels.length > 0) return _getBp('aux');
+                         if (pType === 'aux' && availableMainPanels.length > 0) return _getBp('main');
+                         return panelBlueprints[Math.floor(Math.random() * panelBlueprints.length)];
+                    };
+                    const bp = _getBp(preferredType, specificName);
+                    return { ...bp, func: (area) => { const p = bp.func(area); if(p) p.dataset.blueprintName = bp.name; return p; } };
                 }
 
 
@@ -3005,12 +2990,12 @@ function createQuantumEntanglementPanel(areaName) {
                     dashboardRoot.appendChild(getNextPanel('aux', !alertPanelUsed ? 'Alert' : null).func('auxB'));
                 } else if (layoutType === 16) {
                     gridTemplateColumns = "1fr 1fr 1fr"; gridTemplateRows = "1fr 1fr";
-                    gridTemplateAreas = `"aux1 main main" "main main aux2"`;
+                    gridTemplateAreas = `"aux1 main main" "aux2 main main"`;
                     dashboardRoot.appendChild(getNextPanel('aux').func('aux1')); dashboardRoot.appendChild(getNextPanel('main').func('main'));
                     dashboardRoot.appendChild(getNextPanel('aux', !alertPanelUsed ? 'Alert' : null).func('aux2'));
                 } else if (layoutType === 17) {
                     gridTemplateColumns = "1fr 1fr 1fr"; gridTemplateRows = "1fr 1fr";
-                    gridTemplateAreas = `"main main aux1" "aux2 main main"`;
+                    gridTemplateAreas = `"main main aux1" "main main aux2"`;
                     dashboardRoot.appendChild(getNextPanel('main').func('main')); dashboardRoot.appendChild(getNextPanel('aux').func('aux1'));
                     dashboardRoot.appendChild(getNextPanel('aux', !alertPanelUsed ? 'Alert' : null).func('aux2'));
                 } else if (layoutType === 18) {
@@ -3035,10 +3020,11 @@ function createQuantumEntanglementPanel(areaName) {
                     dashboardRoot.appendChild(getNextPanel('aux', !alertPanelUsed && Math.random() < 0.5 ? 'Alert' : null).func('rightColAlert'));
                 } else if (layoutType === 21) {
                     gridTemplateColumns = "1fr 1.5fr 1fr"; gridTemplateRows = "1fr 1.5fr 1fr";
-                    gridTemplateAreas = `"aux1 mainV aux2" "mainH mainH mainH" "aux3 mainV auxAlert"`;
-                    dashboardRoot.appendChild(getNextPanel('aux').func('aux1')); dashboardRoot.appendChild(getNextPanel('main').func('mainV'));
+                    gridTemplateAreas = `"aux1 mainVTop aux2" "mainH mainH mainH" "aux3 mainVBot auxAlert"`;
+                    dashboardRoot.appendChild(getNextPanel('aux').func('aux1')); dashboardRoot.appendChild(getNextPanel('main').func('mainVTop'));
                     dashboardRoot.appendChild(getNextPanel('aux').func('aux2')); dashboardRoot.appendChild(getNextPanel('main').func('mainH'));
-                    dashboardRoot.appendChild(getNextPanel('aux').func('aux3')); dashboardRoot.appendChild(getNextPanel('aux', 'Alert').func('auxAlert'));
+                    dashboardRoot.appendChild(getNextPanel('aux').func('aux3')); dashboardRoot.appendChild(getNextPanel('main').func('mainVBot'));
+                    dashboardRoot.appendChild(getNextPanel('aux', 'Alert').func('auxAlert'));
                 } else if (layoutType === 22) {
                     gridTemplateColumns = "2fr 2fr"; gridTemplateRows = "1fr 1fr 1fr";
                     gridTemplateAreas = `"mainL aux1" "mainL aux2" "mainL auxAlert"`;
@@ -3363,6 +3349,148 @@ function createQuantumEntanglementPanel(areaName) {
             }
         });
 
+    </script>
+    <div id="exportBtn" title="Export 4K Wallpaper">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="export-icon">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+            <circle cx="12" cy="12" r="3" stroke-width="1"></circle>
+            <path d="M12 22V12"></path>
+        </svg>
+    </div>
+    <style>
+                #exportBtn {
+            position: fixed; bottom: 20px; right: 20px; width: 50px; height: 50px;
+            background: rgba(0,0,0,0.6); border: 1px solid var(--panel-border-color);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; opacity: 0.6; transition: all 0.3s; z-index: 1000;
+            color: var(--primary-text-color); box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        #exportBtn:hover { opacity: 1; background: rgba(var(--base-phosphor-color-rgb), 0.2); box-shadow: 0 0 15px var(--panel-glow-color-strong); transform: scale(1.1); }
+        #exportBtn svg { width: 28px; height: 28px; transition: transform 0.5s; }
+        #exportBtn.loading { pointer-events: none; opacity: 0.8; animation: pulse-btn 1.5s infinite; }
+        .spinner-icon { animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse-btn { 0%, 100% { box-shadow: 0 0 10px var(--panel-glow-color-strong); } 50% { box-shadow: 0 0 25px var(--panel-glow-color-strong); } }
+
+    </style>
+    <script>
+                document.getElementById('exportBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('exportBtn');
+            const originalContent = btn.innerHTML;
+
+            // 1. UI Feedback: Show Loading State
+            btn.classList.add('loading');
+            btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spinner-icon"><circle cx="12" cy="12" r="10" opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10" opacity="0.75"></path></svg>';
+            btn.title = "Generating 4K Wallpaper... (Please Wait)";
+
+            // 2. Yield to UI render loop before heavy lifting
+            setTimeout(async () => {
+                try {
+                    // --- Export Logic ---
+                    const targetWidth = 3840; const targetHeight = 2160;
+                    const container = document.createElement('div');
+                    container.id = 'exportContainer';
+                    container.style.position = 'fixed'; container.style.left = '100vw'; container.style.top = '0';
+                    container.style.width = targetWidth + 'px'; container.style.height = targetHeight + 'px';
+                    container.style.backgroundColor = '#000000'; // Ensure black background
+                    container.style.display = 'grid'; container.style.gap = '2px'; container.style.padding = '2px';
+                    container.style.overflow = 'hidden';
+                    container.style.boxSizing = 'border-box';
+
+                    // Copy grid styles
+                    const root = document.getElementById('dashboardRoot');
+                    container.style.gridTemplateColumns = root.style.gridTemplateColumns;
+                    container.style.gridTemplateRows = root.style.gridTemplateRows;
+                    container.style.gridTemplateAreas = root.style.gridTemplateAreas;
+
+                    // Scale font size
+                    const scale = targetWidth / root.clientWidth;
+                    const computedFontSize = parseFloat(getComputedStyle(document.body).fontSize) || 16;
+                    container.style.fontSize = (computedFontSize * scale) + 'px';
+
+                    document.body.appendChild(container);
+
+                    // Reconstruct Panels
+                    const panels = Array.from(root.children);
+                    const initPromises = [];
+
+                    panels.forEach(p => {
+                        const area = p.style.gridArea;
+                        const bpName = p.dataset.blueprintName;
+                        if (!bpName || !area) return;
+
+                        const bp = panelBlueprints.find(b => b.name === bpName);
+                        if (bp) {
+                            const newPanel = bp.func(area);
+                            container.appendChild(newPanel);
+                            // Ensure full opacity for export
+                            newPanel.style.opacity = '1';
+
+                            // Trigger Init
+                            if (newPanel.initContent) {
+                                 initPromises.push(new Promise(resolve => {
+                                     // Use a slight staggered delay to not choke the event loop all at once
+                                     setTimeout(() => {
+                                         newPanel.initContent();
+                                         resolve();
+                                     }, Math.random() * 50);
+                                 }));
+                            }
+                        }
+                    });
+
+                    await Promise.all(initPromises);
+                    // Wait for animations/canvas draws to settle
+                    await new Promise(r => setTimeout(r, 2000));
+
+                    // 3. Generate Canvas
+                    const canvas = await html2canvas(container, {
+                        scale: 1, // 1:1 with container size
+                        width: targetWidth, height: targetHeight,
+                        windowWidth: targetWidth, windowHeight: targetHeight,
+                        backgroundColor: '#000000',
+                        logging: false,
+                        useCORS: true,
+                        allowTaint: true,
+                        imageTimeout: 0,
+                        onclone: (clonedDoc) => {
+                            // Ensure cloned fonts/styles are applied
+                            const clonedContainer = clonedDoc.getElementById('exportContainer');
+                            if(clonedContainer) clonedContainer.style.transform = 'none';
+                        }
+                    });
+
+                    // 4. Optimize Download (toBlob)
+                    canvas.toBlob((blob) => {
+                        if (!blob) {
+                            throw new Error("Canvas to Blob failed");
+                        }
+                        const url = URL.createObjectURL(blob);
+                        const link = document.createElement('a');
+                        link.download = 'alien-terminal-wallpaper-4k.png';
+                        link.href = url;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        URL.revokeObjectURL(url);
+
+                        // Success Feedback
+                        btn.classList.remove('loading');
+                        btn.innerHTML = originalContent;
+                        btn.title = "Export 4K Wallpaper";
+                    }, 'image/png');
+
+                } catch (err) {
+                    console.error("Export failed:", err);
+                    alert("Export failed: " + err.message);
+                    btn.classList.remove('loading');
+                    btn.innerHTML = originalContent;
+                } finally {
+                     const c = document.getElementById('exportContainer');
+                     if(c) document.body.removeChild(c);
+                }
+            }, 100); // 100ms delay to allow UI to render 'loading' state
+        });
     </script>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-1CQ4D3VQ3L"></script>
 <script>
