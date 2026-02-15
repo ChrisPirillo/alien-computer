@@ -2818,7 +2818,7 @@ function createQuantumEntanglementPanel(areaName) {
                 return; 
             }
             isBuildingDashboard = true; 
-            dashboardRoot.style.visibility = 'hidden'; 
+            dashboardRoot.style.display = 'none';
 
             try {
                 dashboardRoot.innerHTML = ''; 
@@ -3317,7 +3317,7 @@ function createQuantumEntanglementPanel(areaName) {
                 }
 
 
-                if (!gridTemplateAreas || gridTemplateAreas.trim() === "") {
+                if (!gridTemplateAreas || gridTemplateAreas.trim() === "" || gridTemplateAreas.includes("undefined")) {
                     console.warn("Layout fallback triggered for type: " + layoutType);
                     gridTemplateColumns = "1fr 1fr";
                     gridTemplateRows = "1fr 1fr";
@@ -3352,7 +3352,7 @@ function createQuantumEntanglementPanel(areaName) {
                 });
 
                 Promise.all(initPromises).then(() => {
-                    dashboardRoot.style.visibility = 'visible';
+                    dashboardRoot.style.display = 'grid';
                 });
 
             } finally {
