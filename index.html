@@ -3383,11 +3383,13 @@ function createQuantumEntanglementPanel(areaName) {
   gtag('js', new Date());
   gtag('config', 'G-1CQ4D3VQ3L');
 </script>
+
+
 <script>
-    // --- 4K Export Logic (Glyph Only) ---
-    const ICON_CAMERA = '<svg viewBox="0 0 10 10" class="alien-glyph" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1;"><use xlink:href="#g28"/></svg>'; // Square with dot
-    const ICON_PROCESS = '<svg viewBox="0 0 10 10" class="alien-glyph" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1;"><use xlink:href="#g17"/></svg>'; // Circle with line
-    const ICON_SUCCESS = '<svg viewBox="0 0 10 10" class="alien-glyph" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1;"><use xlink:href="#g22"/></svg>'; // V-shape
+    // --- 4K Export Logic (Optimized) ---
+    const ICON_CAMERA = '<svg viewBox="0 0 10 10" class="alien-glyph" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1;"><use xlink:href="#g28"/></svg>';
+    const ICON_PROCESS = '<svg viewBox="0 0 10 10" class="alien-glyph" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1;"><use xlink:href="#g17"/></svg>';
+    const ICON_SUCCESS = '<svg viewBox="0 0 10 10" class="alien-glyph" style="width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1;"><use xlink:href="#g22"/></svg>';
 
     const exportBtn = document.createElement('button');
     exportBtn.id = 'export-btn';
@@ -3398,6 +3400,26 @@ function createQuantumEntanglementPanel(areaName) {
     exportBtn.onmouseover = function() { this.style.opacity = '1'; this.style.transform = 'scale(1.1)'; };
     exportBtn.onmouseout = function() { this.style.opacity = '0.8'; this.style.transform = 'scale(1)'; };
 
+    // Helper to generate scanline pattern efficiently
+    function getScanlinePattern(color) {
+        const c = document.createElement('canvas');
+        c.width = 4; c.height = 4;
+        const ctx = c.getContext('2d');
+        // Transparent background
+        // Draw lines
+        // 0: transparent
+        // 1: color (0.3)
+        // 2: color (0.5)
+        // 3: color (0.3)
+        const rgb = color.match(/\d+,\s*\d+,\s*\d+/)[0]; // Extract "R, G, B"
+        ctx.fillStyle = `rgba(${rgb}, 0.3)`;
+        ctx.fillRect(0, 1, 4, 1);
+        ctx.fillRect(0, 3, 4, 1);
+        ctx.fillStyle = `rgba(${rgb}, 0.5)`;
+        ctx.fillRect(0, 2, 4, 1);
+        return c.toDataURL();
+    }
+
     exportBtn.onclick = function() {
         if (this.disabled) return;
         this.disabled = true;
@@ -3407,7 +3429,6 @@ function createQuantumEntanglementPanel(areaName) {
         this.style.color = '#FFFFFF';
         this.style.borderColor = '#FFFFFF';
 
-        // Add spin animation
         if (!document.getElementById('alien-spin-style')) {
             const styleSheet = document.createElement("style");
             styleSheet.id = 'alien-spin-style';
@@ -3416,85 +3437,94 @@ function createQuantumEntanglementPanel(areaName) {
         }
         this.firstChild.style.animation = "spinAlien 1s linear infinite";
 
+        // Generate pattern BEFORE pausing to ensure we have the color
+        const baseColorVar = getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim();
+        const scanlinePatternUrl = getScanlinePattern(baseColorVar);
+
         // Pause animations
         const canvases = document.querySelectorAll('canvas');
         canvases.forEach(c => { if(c.clearAnimation) c.clearAnimation(); });
 
-        setTimeout(() => {
-            // Hide button for capture
-            this.style.visibility = 'hidden';
+        // Use rAF to allow UI to paint the spinner before blocking
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                // Hide button for capture
+                this.style.visibility = 'hidden';
 
-            // Get RGB for scanlines
-            const baseRGB = getComputedStyle(document.documentElement).getPropertyValue('--base-phosphor-color-rgb').trim();
+                html2canvas(document.body, {
+                    scale: 2, // Keep high res
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#000000',
+                    windowWidth: document.documentElement.scrollWidth,
+                    windowHeight: document.documentElement.scrollHeight,
+                    logging: false,
+                    ignoreElements: (el) => el.id === 'export-btn',
+                    onclone: (clonedDoc) => {
+                        // Inject Robust Scanline Overlay
+                        const overlay = clonedDoc.createElement('div');
+                        overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99999;mix-blend-mode:overlay;';
+                        overlay.style.backgroundImage = `url("${scanlinePatternUrl}")`;
+                        overlay.style.backgroundSize = '4px 4px'; // Match canvas size
+                        overlay.style.height = clonedDoc.documentElement.scrollHeight + 'px';
 
-            html2canvas(document.body, {
-                scale: 2,
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: '#000000',
-                windowWidth: document.documentElement.scrollWidth,
-                windowHeight: document.documentElement.scrollHeight,
-                logging: false,
-                ignoreElements: (el) => el.id === 'export-btn',
-                onclone: (clonedDoc) => {
-                    // Inject Bold Scanlines into Clone Only
-                    const scanlineDiv = clonedDoc.createElement('div');
-                    scanlineDiv.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;background-image:repeating-linear-gradient(transparent 0px, rgba(' + baseRGB + ', 0.40) 1px, rgba(' + baseRGB + ', 0.50) 2px, rgba(' + baseRGB + ', 0.40) 3px, transparent 4px), radial-gradient(ellipse at center, rgba(0,0,0,0) 65%, rgba(0,0,0,0.5) 100%);background-size: 100% 4px, 100% 100%;';
-                    scanlineDiv.style.height = clonedDoc.documentElement.scrollHeight + 'px';
-                    clonedDoc.body.appendChild(scanlineDiv);
+                        // Vignette (Gradient is usually fine, but keep it simple)
+                        const vignette = clonedDoc.createElement('div');
+                        vignette.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99998;background:radial-gradient(circle, transparent 60%, rgba(0,0,0,0.6) 100%);';
+                        vignette.style.height = clonedDoc.documentElement.scrollHeight + 'px';
 
-                    // Also ensure animations are frozen in clone (CSS class)
-                    // clonedDoc.body.classList.add('export-freeze'); // If we had this class
-                }
-            }).then(canvas => {
-                // Restore Button Visibility
-                this.style.visibility = 'visible';
+                        clonedDoc.body.appendChild(overlay);
+                        clonedDoc.body.appendChild(vignette);
+                    }
+                }).then(canvas => {
+                    // Restore UI
+                    this.style.visibility = 'visible';
 
-                // 2. STATE: SUCCESS
-                this.firstChild.style.animation = "";
-                this.innerHTML = ICON_SUCCESS;
-                this.style.color = '#00FF00';
-                this.style.borderColor = '#00FF00';
-                this.style.boxShadow = '0 0 25px rgba(0,255,0,0.8)';
+                    // 2. STATE: SUCCESS
+                    this.firstChild.style.animation = "";
+                    this.innerHTML = ICON_SUCCESS;
+                    this.style.color = '#00FF00';
+                    this.style.borderColor = '#00FF00';
+                    this.style.boxShadow = '0 0 25px rgba(0,255,0,0.8)';
 
-                // Construct Filename
-                const theme = window.currentThemeName || 'Unknown';
-                const layout = window.currentLayoutId !== undefined ? window.currentLayoutId : 'X';
-                const date = new Date().toISOString().split('T')[0];
-                const filename = `AlienDashboard_Layout${layout}_${theme.charAt(0).toUpperCase() + theme.slice(1)}_${date}.png`;
+                    // Filename
+                    const theme = window.currentThemeName || 'Unknown';
+                    const layout = window.currentLayoutId !== undefined ? window.currentLayoutId : 'X';
+                    const date = new Date().toISOString().split('T')[0];
+                    const filename = `AlienDashboard_Layout${layout}_${theme.charAt(0).toUpperCase() + theme.slice(1)}_${date}.png`;
 
-                // Download
-                const link = document.createElement('a');
-                link.download = filename;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
+                    const link = document.createElement('a');
+                    link.download = filename;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
 
-                // 3. REVERT STATE
-                setTimeout(() => {
+                    // 3. REVERT STATE (Fast)
+                    setTimeout(() => {
+                        this.innerHTML = ICON_CAMERA;
+                        this.style.color = 'var(--base-phosphor-color)';
+                        this.style.borderColor = 'var(--base-phosphor-color)';
+                        this.style.boxShadow = '0 0 15px var(--panel-glow-color-strong)';
+                        this.disabled = false;
+
+                        // Restart Animations
+                        const canvases = document.querySelectorAll('canvas');
+                        canvases.forEach(c => {
+                            if(c.drawFunction && c.isConnected) {
+                                if(c.clearAnimation) c.clearAnimation();
+                                c.drawFunction(c);
+                            }
+                        });
+                    }, 1000); // Reduced delay
+
+                }).catch(err => {
+                    console.error(err);
+                    this.style.visibility = 'visible';
+                    this.disabled = false;
                     this.innerHTML = ICON_CAMERA;
                     this.style.color = 'var(--base-phosphor-color)';
-                    this.style.borderColor = 'var(--base-phosphor-color)';
-                    this.style.boxShadow = '0 0 15px var(--panel-glow-color-strong)';
-                    this.disabled = false;
-
-                    // Restart Animations
-                    const canvases = document.querySelectorAll('canvas');
-                    canvases.forEach(c => {
-                        if(c.drawFunction && c.isConnected) {
-                             if(c.clearAnimation) c.clearAnimation();
-                             c.drawFunction(c);
-                        }
-                    });
-                }, 2000);
-
-            }).catch(err => {
-                console.error(err);
-                this.style.visibility = 'visible';
-                this.disabled = false;
-                this.innerHTML = ICON_CAMERA;
-                this.style.color = 'var(--base-phosphor-color)';
-            });
-        }, 500);
+                });
+            }); // End rAF 2
+        }); // End rAF 1
     };
     document.body.appendChild(exportBtn);
 </script>
