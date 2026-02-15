@@ -3352,7 +3352,40 @@ function createQuantumEntanglementPanel(areaName) {
                          dashboardRoot.appendChild(getNextPanel('aux').func('aux'));
                     }
                 }
-                dashboardRoot.style.gridTemplateAreas = gridTemplateAreas.trim();
+
+                // Validate Grid Layout
+                const validateGrid = (areas, cols) => {
+                    if (!areas || !cols) return false;
+                    // Robust splitting for areas string (handles newlines and quotes)
+                    // We expect "area1 area2" "area3 area4" format
+                    const rows = areas.trim().match(/"[^"]+"/g);
+
+                    if (!rows || rows.length === 0) {
+                        // Fallback: check if it's a simple string without quotes (unlikely for grid-areas but possible in simple CSS)
+                        // If no quotes, treat as single row? No, usually valid grid-template-areas has quotes.
+                        return false;
+                    }
+
+                    // Count tokens in first row
+                    const getTokens = (r) => r.replace(/"/g, '').trim().split(/\s+/).filter(t => t.length > 0);
+                    const expectedTokens = getTokens(rows[0]).length;
+
+                    for (let i = 1; i < rows.length; i++) {
+                        const tokens = getTokens(rows[i]).length;
+                        if (tokens !== expectedTokens) {
+                            console.error("Layout Validation Failed: Token mismatch in row " + i + ". Expected " + expectedTokens + ", got " + tokens);
+                            return false;
+                        }
+                    }
+                    return true;
+                };
+
+                if (!validateGrid(gridTemplateAreas, gridTemplateColumns)) {
+                     console.error("Invalid Grid Layout generated. Forcing safe layout.");
+                     throw new Error("Invalid Grid Layout");
+                }
+
+dashboardRoot.style.gridTemplateAreas = gridTemplateAreas.trim();
                 dashboardRoot.style.gridTemplateColumns = gridTemplateColumns;
                 dashboardRoot.style.gridTemplateRows = gridTemplateRows;
 
@@ -3374,7 +3407,19 @@ function createQuantumEntanglementPanel(areaName) {
                     });
                 });
 
-                Promise.all(initPromises).then(() => {
+
+                // Force show after a timeout to prevent blank screen if something hangs
+                setTimeout(() => {
+                    if (dashboardRoot.style.display === 'none') {
+                        console.warn("Forcing dashboard display after timeout.");
+                        dashboardRoot.style.display = 'grid';
+                        isBuildingDashboard = false;
+                        // Trigger a resize event to wake up canvases
+                        window.dispatchEvent(new Event('resize'));
+                    }
+                }, 3000);
+
+Promise.all(initPromises).then(() => {
                     dashboardRoot.style.display = 'grid'; isBuildingDashboard = false; // isBuildingDashboard = false; // Moved
                 });
 
@@ -3387,7 +3432,7 @@ function createQuantumEntanglementPanel(areaName) {
             buildRandomDashboard(); 
         });
 
-        document.addEventListener('keydown', (event) => { if (event.repeat) return;
+        document.addEventListener('keydown', (event) => { if (event.repeat || event.metaKey || event.ctrlKey) return;
             if (event.key === 'r' || event.key === 'R') { 
                 applyRandomMonochromeTheme();
                 buildRandomDashboard();
@@ -3480,6 +3525,10 @@ function createQuantumEntanglementPanel(areaName) {
                     logging: false,
                     ignoreElements: (el) => el.id === 'export-btn',
                     onclone: (clonedDoc) => {
+                        const style = clonedDoc.createElement('style');
+                        style.innerHTML = '#dashboardRoot::before { display: none !important; }';
+                        clonedDoc.head.appendChild(style);
+
                         const vignette = clonedDoc.createElement('div');
                         vignette.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99998;background:radial-gradient(circle, transparent 60%, rgba(0,0,0,0.6) 100%);';
                         vignette.style.height = clonedDoc.documentElement.scrollHeight + 'px';
