@@ -712,7 +712,7 @@
             panel.appendChild(canvas);
             let animationFrameIdWave;
             const waveData = new Array(100).fill(0);
-            canvas.clearAnimation = () => { if (animationFrameIdWave) cancelAnimationFrame(animationFrameIdWave); animationFrameIdWave = null; }; };
+            canvas.clearAnimation = () => { if (animationFrameIdWave) cancelAnimationFrame(animationFrameIdWave); animationFrameIdWave = null; };
 
             function drawWave(canvasEl) {
                 if (!canvasEl.isConnected) { if(animationFrameIdWave) cancelAnimationFrame(animationFrameIdWave); animationFrameIdWave = null; return; }
@@ -752,7 +752,7 @@
             panel.appendChild(canvas);
             let animationFrameIdGauge;
             let currentValue = Math.random();
-            canvas.clearAnimation = () => { if (animationFrameIdGauge) cancelAnimationFrame(animationFrameIdGauge); animationFrameIdGauge = null; }; };
+            canvas.clearAnimation = () => { if (animationFrameIdGauge) cancelAnimationFrame(animationFrameIdGauge); animationFrameIdGauge = null; };
 
             function drawGauge(canvasEl) {
                 if (!canvasEl.isConnected) { if(animationFrameIdGauge) cancelAnimationFrame(animationFrameIdGauge); animationFrameIdGauge = null; return; }
@@ -837,7 +837,7 @@
             panel.appendChild(canvas);
             let animationFrameIdHeatmap;
             const gridSize = 12; let cellValues = [];
-            canvas.clearAnimation = () => { if (animationFrameIdHeatmap) cancelAnimationFrame(animationFrameIdHeatmap); animationFrameIdHeatmap = null; }; };
+            canvas.clearAnimation = () => { if (animationFrameIdHeatmap) cancelAnimationFrame(animationFrameIdHeatmap); animationFrameIdHeatmap = null; };
             function initHeatmap(w,h) { cellValues = Array(gridSize * gridSize).fill(0).map(() => Math.random());}
             function drawHeatmap(canvasEl) {
                 if (!canvasEl.isConnected) { if(animationFrameIdHeatmap) cancelAnimationFrame(animationFrameIdHeatmap); animationFrameIdHeatmap = null; return; }
@@ -869,7 +869,7 @@
             const { panel } = createPanelShell('orbital-path', areaName);
             const canvas = document.createElement('canvas'); canvas.className = 'orbital-path-canvas'; panel.appendChild(canvas);
             let animationFrameIdOrbital; const planets = []; const numPlanets = 5;
-            canvas.clearAnimation = () => { if (animationFrameIdOrbital) cancelAnimationFrame(animationFrameIdOrbital); animationFrameIdOrbital = null; }; };
+            canvas.clearAnimation = () => { if (animationFrameIdOrbital) cancelAnimationFrame(animationFrameIdOrbital); animationFrameIdOrbital = null; };
 
             function initOrbital(w, h) {
                 planets.length = 0; const centerX = w / 2; const centerY = h / 2;
@@ -902,7 +902,7 @@
             const { panel } = createPanelShell('frequency-spectrum', areaName);
             const canvas = document.createElement('canvas'); canvas.className = 'frequency-spectrum-canvas'; panel.appendChild(canvas);
             let animationFrameIdSpectrum; const numBars = 20; let barHeights = new Array(numBars).fill(0);
-            canvas.clearAnimation = () => { if (animationFrameIdSpectrum) cancelAnimationFrame(animationFrameIdSpectrum); animationFrameIdSpectrum = null; }; };
+            canvas.clearAnimation = () => { if (animationFrameIdSpectrum) cancelAnimationFrame(animationFrameIdSpectrum); animationFrameIdSpectrum = null; };
             function initSpectrum(w,h){ barHeights = new Array(numBars).fill(0).map(()=> Math.random() * h * 0.7); }
             function drawSpectrum(canvasEl) {
                 if (!canvasEl.isConnected) { if(animationFrameIdSpectrum) cancelAnimationFrame(animationFrameIdSpectrum); animationFrameIdSpectrum = null; return; }
@@ -938,7 +938,7 @@
             canvas.clearAnimation = () => {
                 if (animationFrameId) cancelAnimationFrame(animationFrameId);
                 animationFrameId = null;
-            }; };
+            };
 
             function initPlasmaField(w, h) {
                 gridPoints = [];
@@ -1037,7 +1037,7 @@
             canvas.clearAnimation = () => {
                 if (animationFrameId) cancelAnimationFrame(animationFrameId);
                 animationFrameId = null;
-            }; };
+            };
 
             function initSubspace(w, h) {
                 anomalies.length = 0;
@@ -1166,7 +1166,7 @@
             canvas.clearAnimation = () => {
                 if (animationFrameId) cancelAnimationFrame(animationFrameId);
                 animationFrameId = null;
-            }; };
+            };
 
             function defineArtifact() { // Simple interconnected cubes
                 const s = 1; // half-size
@@ -1360,7 +1360,7 @@
             const { panel } = createPanelShell('energy-flow', areaName);
             const canvas = document.createElement('canvas'); canvas.className = 'energy-flow-canvas'; panel.appendChild(canvas);
             let animationFrameIdFlow; let particles = []; const numParticles = 20;
-            canvas.clearAnimation = () => { if (animationFrameIdFlow) cancelAnimationFrame(animationFrameIdFlow); animationFrameIdFlow = null; }; };
+            canvas.clearAnimation = () => { if (animationFrameIdFlow) cancelAnimationFrame(animationFrameIdFlow); animationFrameIdFlow = null; };
             function initFlow(w,h) {
                 particles = [];
                 for (let i = 0; i < numParticles; i++) { particles.push({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - 0.5) * 1.2 + (w > h ? (Math.random() > 0.5 ? 0.8 : -0.8) * 0.4 : 0), vy: (Math.random() - 0.5) * 1.2 + (h > w ? (Math.random() > 0.5 ? 0.8 : -0.8) * 0.4 : 0), size: Math.random() * 1.5 + 0.8, alpha: Math.random() * 0.4 + 0.25, life: Math.random() * 70 + 30 }); }
@@ -1391,7 +1391,7 @@
             const { panel } = createPanelShell('targeting-reticule', areaName);
             const canvas = document.createElement('canvas'); canvas.className = 'targeting-reticule-canvas'; panel.appendChild(canvas);
             let animationFrameIdReticule; let crosshairX, crosshairY; let targetOffsetX = 0, targetOffsetY = 0;
-            canvas.clearAnimation = () => { if (animationFrameIdReticule) cancelAnimationFrame(animationFrameIdReticule); animationFrameIdReticule = null; }; };
+            canvas.clearAnimation = () => { if (animationFrameIdReticule) cancelAnimationFrame(animationFrameIdReticule); animationFrameIdReticule = null; };
             function drawReticule(canvasEl) {
                 if (!canvasEl.isConnected) { if(animationFrameIdReticule) cancelAnimationFrame(animationFrameIdReticule); animationFrameIdReticule = null; return; }
                 const ctx = canvasEl.getContext('2d'); const w = canvasEl.width, h = canvasEl.height; if(w <= 0 || h <= 0) {animationFrameIdReticule = requestAnimationFrame(() => drawReticule(canvasEl)); return;}
@@ -1452,7 +1452,7 @@
             const { panel } = createPanelShell('starmap', areaName);
             const canvas = document.createElement('canvas'); canvas.className = 'starmap-canvas'; panel.appendChild(canvas);
             let animationFrameIdStarmap; let stars = []; const numStars = 100;
-            canvas.clearAnimation = () => { if (animationFrameIdStarmap) cancelAnimationFrame(animationFrameIdStarmap); animationFrameIdStarmap = null; }; };
+            canvas.clearAnimation = () => { if (animationFrameIdStarmap) cancelAnimationFrame(animationFrameIdStarmap); animationFrameIdStarmap = null; };
             function initStars(w,h) {
                 stars = []; for (let i = 0; i < numStars; i++) { stars.push({ x: Math.random() * w, y: Math.random() * h, size: Math.random() * 1.5 + 0.5, alpha: Math.random() * 0.5 + 0.2, blinkSpeed: Math.random() * 0.05 + 0.01, blinkPhase: Math.random() * Math.PI * 2 }); }
             }
@@ -1482,7 +1482,7 @@
             const { panel } = createPanelShell('pulse-wave', areaName);
             const canvas = document.createElement('canvas'); canvas.className = 'pulse-wave-canvas'; panel.appendChild(canvas);
             let animationFrameIdPulse; let pulseRadius = 0; let pulseMaxRadius; let pulseOpacity = 1;
-            canvas.clearAnimation = () => { if (animationFrameIdPulse) cancelAnimationFrame(animationFrameIdPulse); animationFrameIdPulse = null; }; };
+            canvas.clearAnimation = () => { if (animationFrameIdPulse) cancelAnimationFrame(animationFrameIdPulse); animationFrameIdPulse = null; };
             function initPulse(w,h){ pulseMaxRadius = Math.max(w,h) * 0.7; pulseRadius = 0; pulseOpacity = 1;}
             function drawPulse(canvasEl) {
                 if (!canvasEl.isConnected) { if(animationFrameIdPulse) cancelAnimationFrame(animationFrameIdPulse); animationFrameIdPulse = null; return; }
@@ -1509,7 +1509,7 @@
             const { panel } = createPanelShell('network-topology', areaName);
             const canvas = document.createElement('canvas'); canvas.className = 'network-topology-canvas'; panel.appendChild(canvas);
             let animationFrameIdTopo; let nodes = []; const numNodes = 8;
-            canvas.clearAnimation = () => { if (animationFrameIdTopo) cancelAnimationFrame(animationFrameIdTopo); animationFrameIdTopo = null; }; };
+            canvas.clearAnimation = () => { if (animationFrameIdTopo) cancelAnimationFrame(animationFrameIdTopo); animationFrameIdTopo = null; };
             function initTopology(w, h) {
                 nodes = [];
                 for (let i = 0; i < numNodes; i++) { nodes.push({ x: Math.random() * w * 0.8 + w * 0.1, y: Math.random() * h * 0.8 + h * 0.1, vx: (Math.random() - 0.5) * 0.2, vy: (Math.random() - 0.5) * 0.2, size: Math.random() * (Math.min(w,h) * 0.02) + (Math.min(w,h) * 0.01), connections: [], state: Math.random() < 0.7 ? 'active' : 'inactive' }); }
@@ -1542,7 +1542,7 @@
             const { panel } = createPanelShell('circular-progress', areaName);
             const canvas = document.createElement('canvas'); canvas.className = 'circular-progress-canvas'; panel.appendChild(canvas);
             let animationFrameIdCircProg; const circles = []; const numCircles = 3;
-            canvas.clearAnimation = () => { if (animationFrameIdCircProg) cancelAnimationFrame(animationFrameIdCircProg); animationFrameIdCircProg = null; }; };
+            canvas.clearAnimation = () => { if (animationFrameIdCircProg) cancelAnimationFrame(animationFrameIdCircProg); animationFrameIdCircProg = null; };
             function initProgress(w, h) {
                 circles.length = 0; const maxRadius = Math.min(w, h) * 0.15;
                 for (let i = 0; i < numCircles; i++) { circles.push({ x: (w / (numCircles + 1)) * (i + 1), y: h / 2, radius: Math.random() * (maxRadius * 0.5) + (maxRadius * 0.5), currentValue: Math.random(), targetValue: Math.random(), speed: Math.random() * 0.005 + 0.001 }); }
@@ -1579,7 +1579,7 @@
             panel.appendChild(canvas);
             let animationFrameIdSpiral;
             let angle = 0; const a = 0.5, b = 0.2;
-            canvas.clearAnimation = () => { if (animationFrameIdSpiral) cancelAnimationFrame(animationFrameIdSpiral); animationFrameIdSpiral = null; }; };
+            canvas.clearAnimation = () => { if (animationFrameIdSpiral) cancelAnimationFrame(animationFrameIdSpiral); animationFrameIdSpiral = null; };
 
             function drawSpiral(canvasEl) {
                 if (!canvasEl.isConnected) { if(animationFrameIdSpiral) cancelAnimationFrame(animationFrameIdSpiral); animationFrameIdSpiral = null; return; }
@@ -1653,7 +1653,7 @@
             panel.appendChild(canvas);
             let animationFrameIdRadar;
             let angle = 0; let blips = []; const numBlips = 8;
-            canvas.clearAnimation = () => { if (animationFrameIdRadar) cancelAnimationFrame(animationFrameIdRadar); animationFrameIdRadar = null; }; };
+            canvas.clearAnimation = () => { if (animationFrameIdRadar) cancelAnimationFrame(animationFrameIdRadar); animationFrameIdRadar = null; };
             function initRadar(w, h) {
                 blips = []; const radius = Math.min(w, h) / 2 * 0.85;
                 for (let i = 0; i < numBlips; i++) {
@@ -1698,7 +1698,7 @@
             canvas.className = 'horizontal-spectrum-canvas';
             panel.appendChild(canvas);
             let animFrame; const numBars = 10; let barWidths = [];
-            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; }; };
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
             function initSpectrum(w,h){ barWidths = new Array(numBars).fill(0).map(()=> Math.random() * w * 0.7); }
             function drawSpectrum(canvasEl){
                 if (!canvasEl.isConnected) { if(animFrame) cancelAnimationFrame(animFrame); animFrame = null; return; }
@@ -1728,7 +1728,7 @@
             canvas.className = 'globe-projection-canvas';
             panel.appendChild(canvas);
             let animFrame; let rotationY = 0; const points = []; const numPoints = 20;
-            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; }; };
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
             function initGlobe(w,h) {
                 points.length = 0;
                 for(let i=0; i<numPoints; i++){ points.push({ lat: (Math.random() - 0.5) * Math.PI, lon: (Math.random() - 0.5) * 2 * Math.PI, blink: Math.random() * 100 }); }
@@ -1783,7 +1783,7 @@
             const { panel } = createPanelShell('flow-chart', areaName);
             const canvas = document.createElement('canvas'); canvas.className = 'data-flow-chart-canvas'; panel.appendChild(canvas);
             let animFrame; const nodes = []; const numNodes = 5; const particles = []; const numParticles = 15;
-            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; }; };
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
             function initChart(w,h){
                 nodes.length = 0; particles.length = 0;
                 for(let i=0; i<numNodes; i++){ nodes.push({x: Math.random()*w*0.8 + w*0.1, y: Math.random()*h*0.8 + h*0.1, w: w*0.1, h: h*0.12}); }
@@ -1818,7 +1818,7 @@
             const { panel } = createPanelShell('particle-collision', areaName);
             const canvas = document.createElement('canvas'); canvas.className = 'particle-collision-canvas'; panel.appendChild(canvas);
             let animFrame; let particles = []; const numParticles = 25;
-            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; }; };
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
             function initCollision(w,h){
                 particles = [];
                 for(let i=0; i<numParticles; i++){ particles.push({ x: Math.random()*w, y: Math.random()*h, vx: (Math.random()-0.5)*1.5, vy: (Math.random()-0.5)*1.5, radius: Math.random()*2 + 1.5, life: 100 + Math.random()*100, collided: false }); }
@@ -1854,7 +1854,7 @@
             const { panel } = createPanelShell('glyph-constellation', areaName);
             const canvas = document.createElement('canvas'); canvas.className = 'glyph-constellation-canvas'; panel.appendChild(canvas);
             let animFrame; const glyphs = []; const numGlyphs = 12;
-            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; }; };
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
             function initConstellation(w,h) {
                 glyphs.length = 0;
                 for(let i=0; i<numGlyphs; i++){
@@ -1945,7 +1945,7 @@
             const { panel } = createPanelShell('bio-rhythm', areaName);
             const canvas = document.createElement('canvas'); canvas.className = 'bio-rhythm-canvas'; panel.appendChild(canvas);
             let animFrame; const waves = []; const numWaves = 3;
-            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; }; };
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
             function initBio(w,h){
                 waves.length = 0;
                 for(let i=0; i<numWaves; i++){
@@ -1986,7 +1986,7 @@
             const { panel } = createPanelShell('hex-grid', areaName);
             const canvas = document.createElement('canvas'); canvas.className = 'hex-grid-canvas'; panel.appendChild(canvas);
             let animFrame; let hexes = []; let hexSize;
-            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; }; };
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
             function initHex(w,h){
                 hexes = []; hexSize = Math.min(w,h) / 10;
                 const hexWidth = Math.sqrt(3) * hexSize;
@@ -2222,7 +2222,7 @@ function createQuantumEntanglementPanel(areaName) {
             const { panel } = createPanelShell('qfoam', areaName);
             const canvas = document.createElement('canvas'); canvas.className = 'main-display-canvas'; panel.appendChild(canvas);
             let animFrame; let particles = []; const numParticles = 120;
-            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; }; };
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
             function initFoam(w,h){
                 particles = [];
                 for(let i=0; i<numParticles; i++){
@@ -2262,7 +2262,7 @@ function createQuantumEntanglementPanel(areaName) {
             const { panel } = createPanelShell('nav-vector', areaName);
             const canvas = document.createElement('canvas'); canvas.className = 'nav-vector-canvas'; panel.appendChild(canvas);
             let animFrame; let vectors = []; const numVectors = 5;
-            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; }; };
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
             function initVectors(w,h){
                 vectors = [];
                 for(let i=0; i<numVectors; i++){
@@ -2338,7 +2338,7 @@ function createQuantumEntanglementPanel(areaName) {
             const canvas = document.createElement('canvas'); canvas.className = 'energy-core-pulse-canvas'; panel.appendChild(canvas);
             let animFrame; let coreSize = 10; let maxSize; let growing = true;
             const rings = [];
-            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; }; };
+            canvas.clearAnimation = () => { if (animFrame) cancelAnimationFrame(animFrame); animFrame = null; };
             function initCore(w,h){ maxSize = Math.min(w,h) * 0.15; coreSize = maxSize * 0.2; rings.length = 0; }
             function drawCore(canvasEl){
                 if (!canvasEl.isConnected) { if(animFrame) cancelAnimationFrame(animFrame); animFrame = null; return; }
