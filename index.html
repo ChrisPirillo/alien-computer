@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alien Computer: Retro Sci-Fi Dashboard Terminal Emulator</title>
 
-    <meta name="description" content="Experience an interactive, randomized retro sci-fi dashboard with an alien aesthetic, 50 panel types, 50 'Tetris-like' static layouts filling the entire browser window, with significantly improved performance and robustly filled glyph-only content.">
+    <meta name="description" content="Experience an interactive, randomized retro sci-fi dashboard with an alien aesthetic, 50 panel types, 51 'Tetris-like' static layouts filling the entire browser window, with significantly improved performance and robustly filled glyph-only content.">
     <meta name="keywords" content="retro, sci-fi, dashboard, alien, interactive, crt, generative, procedural, interface, computer screen, tetris layout, 50 panels, 50 layouts, static display, glyphs only, full panels, no overlap, optimized, performance, revamped">
     <meta name="author" content="Chris Pirillo">
     <meta property="og:title" content="Alien Computer: Retro Sci-Fi Dashboard Terminal Emulator">
-    <meta property="og:description" content="Interactive, randomized retro sci-fi dashboard with 50 panel types, 50 'Tetris-like' static layouts filling the entire browser window, with significantly improved performance and robustly filled glyph-only content.">
+    <meta property="og:description" content="Interactive, randomized retro sci-fi dashboard with 50 panel types, 51 'Tetris-like' static layouts filling the entire browser window, with significantly improved performance and robustly filled glyph-only content.">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://pirillo.com/arcade/images/alien-computer.png">
     <meta property="og:url" content="https://pirillo.com/arcade/alien-computer.html">
@@ -29,7 +29,7 @@
       "@context": "https://schema.org",
       "@type": "WebApplication",
       "name": "Alien Computer: Retro Sci-Fi Dashboard Terminal Emulator",
-      "description": "Experience an interactive, randomized retro sci-fi dashboard with an alien aesthetic, 50 panel types, 50 complex 'Tetris-like' static layouts filling the entire browser window, with optimized performance and robustly filled glyph-only content.",
+      "description": "Experience an interactive, randomized retro sci-fi dashboard with an alien aesthetic, 50 panel types, 51 complex 'Tetris-like' static layouts filling the entire browser window, with optimized performance and robustly filled glyph-only content.",
       "applicationCategory": "Entertainment",
       "operatingSystem": "Any (Web Browser)",
       "browserRequirements": "Requires HTML5, CSS3, and JavaScript.",
@@ -99,12 +99,12 @@
             border: 1px solid var(--main-container-border-color);
             border-radius: 0; 
             box-shadow: 0 0 20px var(--main-container-glow-color), inset 0 0 10px rgba(0,0,0,0.7);
-            display: grid;
+            display: grid; /* CRITICAL: Must be grid from the start for grid-area to work! */
             gap: 2px; 
             padding: 2px; 
             overflow: hidden; position: relative;
             filter: blur(0.2px); 
-            display: none; /* MODIFICATION: Initially hide to prevent FOUC */
+            visibility: hidden; /* Use visibility instead of display:none to prevent FOUC while keeping grid layout active */
         }
         #dashboardRoot::before { 
             content: ""; position: absolute; top: 0; left: 0; right:0; bottom:0;
@@ -403,7 +403,11 @@
         // --- Panel Utilities ---
         function createPanelShell(type = '', areaName = '') {
             const panel = document.createElement('div'); panel.className = 'panel';
-            if (type) panel.classList.add(type + '-type'); if (areaName) panel.style.gridArea = areaName;
+            if (type) panel.classList.add(type + '-type'); 
+            if (areaName) {
+                panel.style.gridArea = areaName;
+                console.log('Setting grid-area:', areaName, 'on panel'); // DEBUG
+            }
             const title = document.createElement('div'); title.className = 'panel-title'; panel.appendChild(title);
             return { panel, title };
         }
@@ -3206,16 +3210,17 @@ function createQuantumEntanglementPanel(areaName) {
         ];
 
 
-        // --- Main Dashboard Building Logic (with 50 layouts) ---
+        // --- Main Dashboard Building Logic (with 51 layouts: 0-50) ---
         function buildRandomDashboard() {
             if (isBuildingDashboard) {
                 return; 
             }
             isBuildingDashboard = true; 
-            dashboardRoot.style.display = 'none'; 
 
             try {
+                // Clear existing content
                 dashboardRoot.innerHTML = ''; 
+                dashboardRoot.style.visibility = 'hidden';
                 
                 panelUpdateIntervals.forEach(intervalId => clearInterval(intervalId));
                 panelUpdateIntervals.length = 0; 
@@ -3227,8 +3232,15 @@ function createQuantumEntanglementPanel(areaName) {
                     }
                 });
 
-                window.currentLayoutId = Math.floor(Math.random() * 50); const layoutType = window.currentLayoutId; 
-                let gridTemplateAreas, gridTemplateColumns, gridTemplateRows;
+                // Select layout (0-50 = 51 total layouts)
+                window.currentLayoutId = Math.floor(Math.random() * 51);
+                const layoutType = window.currentLayoutId; 
+                console.log('🎯 Selected layout:', layoutType);
+                
+                // CRITICAL: Initialize grid variables with defaults to prevent undefined
+                let gridTemplateAreas = '"main main" "aux aux"';
+                let gridTemplateColumns = '1fr 1fr';
+                let gridTemplateRows = '1fr 1fr';
 
                 const allPanelBlueprints = [...panelBlueprints];
                 for (let i = allPanelBlueprints.length - 1; i > 0; i--) {
@@ -3398,15 +3410,25 @@ function createQuantumEntanglementPanel(areaName) {
                     dashboardRoot.appendChild(getNextPanel('aux').func('auxT')); dashboardRoot.appendChild(getNextPanel('main').func('main'));
                     dashboardRoot.appendChild(getNextPanel('aux', !alertPanelUsed ? 'Alert' : null).func('auxB'));
                 } else if (layoutType === 16) {
-                    gridTemplateColumns = "1fr 1fr 1fr"; gridTemplateRows = "1fr 1fr";
-                    gridTemplateAreas = `"aux1 main main" "main main aux2"`;
-                    dashboardRoot.appendChild(getNextPanel('aux').func('aux1')); dashboardRoot.appendChild(getNextPanel('main').func('main'));
-                    dashboardRoot.appendChild(getNextPanel('aux', !alertPanelUsed ? 'Alert' : null).func('aux2'));
+                    // FIXED: Valid 2x3 grid with tall main panel on right
+                    gridTemplateColumns = "1fr 1fr 2fr"; 
+                    gridTemplateRows = "1fr 1fr";
+                    gridTemplateAreas = `"aux1 aux2 main" "aux3 auxAlert main"`;
+                    dashboardRoot.appendChild(getNextPanel('aux').func('aux1'));
+                    dashboardRoot.appendChild(getNextPanel('aux').func('aux2'));
+                    dashboardRoot.appendChild(getNextPanel('main').func('main'));
+                    dashboardRoot.appendChild(getNextPanel('aux').func('aux3'));
+                    dashboardRoot.appendChild(getNextPanel('aux', 'Alert').func('auxAlert'));
                 } else if (layoutType === 17) {
-                    gridTemplateColumns = "1fr 1fr 1fr"; gridTemplateRows = "1fr 1fr";
-                    gridTemplateAreas = `"main main aux1" "aux2 main main"`;
-                    dashboardRoot.appendChild(getNextPanel('main').func('main')); dashboardRoot.appendChild(getNextPanel('aux').func('aux1'));
-                    dashboardRoot.appendChild(getNextPanel('aux', !alertPanelUsed ? 'Alert' : null).func('aux2'));
+                    // FIXED: Valid 2x3 grid with tall main panel on left
+                    gridTemplateColumns = "2fr 1fr 1fr"; 
+                    gridTemplateRows = "1fr 1fr";
+                    gridTemplateAreas = `"main aux1 aux2" "main aux3 auxAlert"`;
+                    dashboardRoot.appendChild(getNextPanel('main').func('main'));
+                    dashboardRoot.appendChild(getNextPanel('aux').func('aux1'));
+                    dashboardRoot.appendChild(getNextPanel('aux').func('aux2'));
+                    dashboardRoot.appendChild(getNextPanel('aux').func('aux3'));
+                    dashboardRoot.appendChild(getNextPanel('aux', 'Alert').func('auxAlert'));
                 } else if (layoutType === 18) {
                     gridTemplateColumns = "1fr 3fr 1fr"; gridTemplateRows = "1fr 3fr 1fr";
                     gridTemplateAreas = `"topL topM topR" "midL main midR" "botL botM botAlert"`;
@@ -3428,11 +3450,19 @@ function createQuantumEntanglementPanel(areaName) {
                     dashboardRoot.appendChild(getNextPanel('aux', !alertPanelUsed ? 'Alert' : null).func('leftColAlert')); dashboardRoot.appendChild(getNextPanel('aux').func('midColBot'));
                     dashboardRoot.appendChild(getNextPanel('aux', !alertPanelUsed && Math.random() < 0.5 ? 'Alert' : null).func('rightColAlert'));
                 } else if (layoutType === 21) {
-                    gridTemplateColumns = "1fr 1.5fr 1fr"; gridTemplateRows = "1fr 1.5fr 1fr";
-                    gridTemplateAreas = `"aux1 mainV aux2" "mainH mainH mainH" "aux3 mainV auxAlert"`;
-                    dashboardRoot.appendChild(getNextPanel('aux').func('aux1')); dashboardRoot.appendChild(getNextPanel('main').func('mainV'));
-                    dashboardRoot.appendChild(getNextPanel('aux').func('aux2')); dashboardRoot.appendChild(getNextPanel('main').func('mainH'));
-                    dashboardRoot.appendChild(getNextPanel('aux').func('aux3')); dashboardRoot.appendChild(getNextPanel('aux', 'Alert').func('auxAlert'));
+                    // FIXED: Valid 3x3 cross/plus pattern with center main panel
+                    gridTemplateColumns = "1fr 1.5fr 1fr"; 
+                    gridTemplateRows = "1fr 1.5fr 1fr";
+                    gridTemplateAreas = `"aux1 mainTop aux2" "mainLeft mainCenter mainRight" "aux3 mainBottom auxAlert"`;
+                    dashboardRoot.appendChild(getNextPanel('aux').func('aux1'));
+                    dashboardRoot.appendChild(getNextPanel('main').func('mainTop'));
+                    dashboardRoot.appendChild(getNextPanel('aux').func('aux2'));
+                    dashboardRoot.appendChild(getNextPanel('main').func('mainLeft'));
+                    dashboardRoot.appendChild(getNextPanel('main').func('mainCenter'));
+                    dashboardRoot.appendChild(getNextPanel('main').func('mainRight'));
+                    dashboardRoot.appendChild(getNextPanel('aux').func('aux3'));
+                    dashboardRoot.appendChild(getNextPanel('main').func('mainBottom'));
+                    dashboardRoot.appendChild(getNextPanel('aux', 'Alert').func('auxAlert'));
                 } else if (layoutType === 22) {
                     gridTemplateColumns = "2fr 2fr"; gridTemplateRows = "1fr 1fr 1fr";
                     gridTemplateAreas = `"mainL aux1" "mainL aux2" "mainL auxAlert"`;
@@ -3708,42 +3738,70 @@ function createQuantumEntanglementPanel(areaName) {
                     dashboardRoot.appendChild(getNextPanel('aux', 'Alert').func('alert'));
                     dashboardRoot.appendChild(getNextPanel('aux').func('c3'));
                     dashboardRoot.appendChild(getNextPanel('aux').func('c4'));
+                } else if (layoutType === 50) { 
+                    // NEW LAYOUT 50: Symmetric cross pattern
+                    gridTemplateColumns = "1fr 2fr 1fr"; gridTemplateRows = "1fr 2fr 1fr";
+                    gridTemplateAreas = `
+                        "auxTL mainT auxTR"
+                        "mainL mainC mainR"
+                        "auxBL mainB auxBRAlert"`;
+                    dashboardRoot.appendChild(getNextPanel('aux').func('auxTL'));
+                    dashboardRoot.appendChild(getNextPanel('main').func('mainT'));
+                    dashboardRoot.appendChild(getNextPanel('aux').func('auxTR'));
+                    dashboardRoot.appendChild(getNextPanel('main').func('mainL'));
+                    dashboardRoot.appendChild(getNextPanel('main').func('mainC'));
+                    dashboardRoot.appendChild(getNextPanel('main').func('mainR'));
+                    dashboardRoot.appendChild(getNextPanel('aux').func('auxBL'));
+                    dashboardRoot.appendChild(getNextPanel('main').func('mainB'));
+                    dashboardRoot.appendChild(getNextPanel('aux', 'Alert').func('auxBRAlert'));
                 }
 
+                // === CRITICAL SECTION: Apply Grid Template ===
+                // Set grid properties IMMEDIATELY, in correct order
+                console.log('📐 Grid setup:', {
+                    columns: gridTemplateColumns,
+                    rows: gridTemplateRows,
+                    areas: gridTemplateAreas,
+                    childCount: dashboardRoot.children.length
+                });
 
-                if (!gridTemplateAreas || gridTemplateAreas.trim() === "" || gridTemplateAreas.includes("undefined")) {
-                    console.warn("Layout fallback triggered for type: " + layoutType);
-                    gridTemplateColumns = "1fr 1fr";
-                    gridTemplateRows = "1fr 1fr";
-                    gridTemplateAreas = '"main main" "aux aux"';
-                    // Ensure content
-                    if (dashboardRoot.children.length < 2) {
-                         dashboardRoot.innerHTML = '';
-                         dashboardRoot.appendChild(getNextPanel('main').func('main'));
-                         dashboardRoot.appendChild(getNextPanel('aux').func('aux'));
-                    }
-                }
+                // Step 1: Set dimensions first
+                dashboardRoot.style.gridTemplateColumns = gridTemplateColumns;
+                dashboardRoot.style.gridTemplateRows = gridTemplateRows;
                 
+                // Step 2: Try to set areas
                 try {
                     dashboardRoot.style.gridTemplateAreas = gridTemplateAreas;
-                } catch(e) { console.error("Grid assignment error", e); }
-                
-                // Fallback check: if the browser rejected the grid areas string (syntax error), it wont be set.
-                if (!dashboardRoot.style.gridTemplateAreas || dashboardRoot.style.gridTemplateAreas === "none" || dashboardRoot.style.gridTemplateAreas === "") {
-                    console.warn("Layout rejected by browser: " + layoutType + ". Using fallback.");
+                } catch(e) { 
+                    console.error('❌ Grid template areas error:', e);
+                    console.error('Problematic areas string:', gridTemplateAreas);
+                    // Fall back to simple 2x2
                     dashboardRoot.style.gridTemplateColumns = "1fr 1fr";
                     dashboardRoot.style.gridTemplateRows = "1fr 1fr";
                     dashboardRoot.style.gridTemplateAreas = '"main main" "aux aux"';
-                    // Ensure we have content for fallback
-                    if (dashboardRoot.children.length < 2) {
-                         dashboardRoot.innerHTML = "";
-                         dashboardRoot.appendChild(getNextPanel("main").func("main"));
-                         dashboardRoot.appendChild(getNextPanel("aux").func("aux"));
-                    }
+                }
+                
+                // Step 3: Verify it was applied
+                const appliedAreas = dashboardRoot.style.gridTemplateAreas;
+                console.log('✓ Applied areas:', appliedAreas);
+                
+                if (!appliedAreas || appliedAreas === 'none' || appliedAreas === '') {
+                    console.warn('⚠️ Browser rejected grid-template-areas for layout', layoutType);
+                    console.warn('Attempted value:', gridTemplateAreas);
+                    // Apply fallback
+                    dashboardRoot.style.gridTemplateColumns = "1fr 1fr";
+                    dashboardRoot.style.gridTemplateRows = "1fr 1fr";
+                    dashboardRoot.style.gridTemplateAreas = '"main main" "aux aux"';
                 }
 
-                dashboardRoot.style.gridTemplateColumns = gridTemplateColumns;
-                dashboardRoot.style.gridTemplateRows = gridTemplateRows;
+                // Step 4: Verify children have grid-area set
+                Array.from(dashboardRoot.children).forEach((child, i) => {
+                    const area = child.style.gridArea;
+                    console.log(`  Panel ${i}: grid-area = "${area}"`);
+                    if (!area) {
+                        console.error(`  ❌ Panel ${i} has NO grid-area!`);
+                    }
+                });
 
                 const panelElements = Array.from(document.querySelectorAll('.panel'));
                 const initPromises = panelElements.map(panelEl => {
@@ -3775,11 +3833,11 @@ function createQuantumEntanglementPanel(areaName) {
                     Promise.allSettled(initPromises),
                     initTimeout
                 ]).then(() => {
-                    dashboardRoot.style.display = 'grid';
+                    dashboardRoot.style.visibility = 'visible'; // Show dashboard
                 }).catch(err => {
                     console.error('Panel initialization error:', err);
                     // Still show the dashboard even if there's an error
-                    dashboardRoot.style.display = 'grid';
+                    dashboardRoot.style.visibility = 'visible';
                 });
 
             } finally {
